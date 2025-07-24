@@ -139,7 +139,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             icon={<Plus size={16} />}
             variant="primary"
             size="md"
-            onClick={() => handleNavigate('/add-client')}
+            onClick={() => onNavigate('/add-client')}
           />
           <ActionButton
             label="View Rota"
