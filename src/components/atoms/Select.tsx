@@ -7,6 +7,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
   helperText?: string;
   options: Array<{ value: string; label: string }>;
+  placeholder?: string;
 }
 
 export const Select: React.FC<SelectProps> = ({
@@ -16,6 +17,7 @@ export const Select: React.FC<SelectProps> = ({
   options,
   className,
   id,
+  placeholder,
   ...props
 }) => {
   const selectId = id || label?.toLowerCase().replace(/\s+/g, '-');
@@ -34,12 +36,17 @@ export const Select: React.FC<SelectProps> = ({
         <select
           id={selectId}
           className={clsx(
-            'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white pr-10',
+            'w-full px-3 py-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white pr-10 min-h-[44px]',
             error && 'border-red-500 focus:ring-red-500 focus:border-red-500',
             className
           )}
           {...props}
         >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

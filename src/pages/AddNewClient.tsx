@@ -44,7 +44,6 @@ interface AddNewClientProps {
 }
 
 const genderOptions = [
-  { value: '', label: 'Select Gender' },
   { value: 'male', label: 'Male' },
   { value: 'female', label: 'Female' },
   { value: 'other', label: 'Other' },
@@ -67,7 +66,6 @@ const languageOptions = [
 ];
 
 const relationshipOptions = [
-  { value: '', label: 'Select Relationship' },
   { value: 'spouse', label: 'Spouse' },
   { value: 'partner', label: 'Partner' },
   { value: 'son', label: 'Son' },
@@ -238,59 +236,66 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto py-6 px-4">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 mb-6">
-          <div className="flex items-center gap-4 mb-4">
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="px-4 py-4 sm:px-6">
+            <div className="flex items-center gap-3 mb-4">
             <Button
               variant="ghost"
-              size="sm"
+              size="md"
               onClick={handleCancel}
               icon={<ArrowLeft size={16} />}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-gray-600 hover:text-gray-900 min-w-[44px] min-h-[44px] p-2 -ml-2"
             >
-              Back
+              <span className="sr-only sm:not-sr-only sm:ml-2">Back</span>
             </Button>
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Add New Client</h1>
-              <p className="text-gray-600">Complete the client registration process</p>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Add New Client</h1>
+              <p className="text-sm sm:text-base text-gray-600">Complete the client registration process</p>
             </div>
           </div>
 
           {/* Progress Indicator */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
             {tabs.map((tab, index) => (
-              <div key={tab.id} className="flex items-center">
-                <div className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+              <React.Fragment key={tab.id}>
+                <div className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all duration-200 min-h-[44px] ${
                   currentTab === tab.id 
-                    ? 'bg-primary-100 text-primary-700' 
+                    ? 'bg-primary-600 text-white shadow-sm' 
                     : currentTab > tab.id 
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-500'
+                      ? 'bg-green-100 text-green-700 border border-green-200'
+                      : 'bg-gray-100 text-gray-500 border border-gray-200'
                 }`}>
-                  {tab.icon}
-                  <span className="font-medium text-sm">{tab.label}</span>
+                  <div className="flex-shrink-0">
+                    {tab.icon}
+                  </div>
+                  <span className="font-medium text-xs sm:text-sm hidden sm:inline">{tab.label}</span>
+                  <span className="font-medium text-xs sm:hidden">{tab.id}</span>
                 </div>
                 {index < tabs.length - 1 && (
-                  <div className={`w-8 h-0.5 mx-2 ${
-                    currentTab > tab.id ? 'bg-green-300' : 'bg-gray-200'
+                  <div className={`w-4 sm:w-8 h-0.5 transition-colors duration-200 ${
+                    currentTab > tab.id ? 'bg-green-400' : 'bg-gray-300'
                   }`} />
                 )}
-              </div>
+              </React.Fragment>
             ))}
+            </div>
+          </div>
           </div>
         </div>
 
         {/* Form Content */}
-        <div className="bg-white rounded-xl border border-gray-100">
+        <div className="bg-white">
           {currentTab === 1 && (
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Basic Information</h2>
+            <div className="p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3">Basic Information</h2>
               
               <div className="space-y-6">
                 {/* Personal Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     label="First Name *"
                     value={basicInfo.firstName}
@@ -307,7 +312,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <Input
                     label="Date of Birth *"
                     type="date"
@@ -321,6 +326,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                     value={basicInfo.gender}
                     onChange={(e) => handleInputChange('gender', e.target.value)}
                     error={errors.gender}
+                    placeholder="Select Gender"
                   />
                   <Input
                     label="Phone Number *"
@@ -333,8 +339,8 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Address Section */}
-                <div className="border-t pt-6">
-                  <h3 className="text-md font-medium text-gray-900 mb-4 flex items-center gap-2">
+                <div className="border-t border-gray-100 pt-6">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
                     <MapPin size={16} />
                     Address Information
                   </h3>
@@ -346,7 +352,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                     error={errors.postcode}
                   />
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                     <Input
                       label="Address Line 1 *"
                       value={basicInfo.address.line1}
@@ -362,7 +368,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                     <Input
                       label="City/Town"
                       value={basicInfo.address.city}
@@ -379,7 +385,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Language */}
-                <div className="border-t pt-6">
+                <div className="border-t border-gray-100 pt-6">
                   <Select
                     label="Spoken Language *"
                     options={languageOptions}
@@ -389,9 +395,9 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Next of Kin */}
-                <div className="border-t pt-6">
-                  <h3 className="text-md font-medium text-gray-900 mb-4">Next of Kin / Emergency Contact</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="border-t border-gray-100 pt-6">
+                  <h3 className="text-base font-medium text-gray-900 mb-4">Next of Kin / Emergency Contact</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <Input
                       label="Name *"
                       value={basicInfo.nextOfKin.name}
@@ -413,14 +419,15 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                       value={basicInfo.nextOfKin.relationship}
                       onChange={(e) => handleInputChange('nextOfKin.relationship', e.target.value)}
                       error={errors.nextOfKinRelationship}
+                      placeholder="Select Relationship"
                     />
                   </div>
                 </div>
 
                 {/* Registered Doctor */}
-                <div className="border-t pt-6">
-                  <h3 className="text-md font-medium text-gray-900 mb-4">Registered Doctor</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border-t border-gray-100 pt-6">
+                  <h3 className="text-base font-medium text-gray-900 mb-4">Registered Doctor</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input
                       label="Doctor Name *"
                       value={basicInfo.registeredDoctor.name}
@@ -440,8 +447,8 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Optional Fields */}
-                <div className="border-t pt-6">
-                  <h3 className="text-md font-medium text-gray-900 mb-4">Additional Information (Optional)</h3>
+                <div className="border-t border-gray-100 pt-6">
+                  <h3 className="text-base font-medium text-gray-900 mb-4">Additional Information (Optional)</h3>
                   <div className="space-y-4">
                     <Input
                       label="Other Residents/Pets"
@@ -450,7 +457,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                       placeholder="List other people or pets in the household"
                     />
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Input
                         label="Key Box/Access Info"
                         value={basicInfo.keyBoxInfo}
@@ -465,7 +472,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Select
                         label="Preferred Carer Gender"
                         options={preferredGenderOptions}
@@ -486,8 +493,8 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
           )}
 
           {currentTab === 2 && (
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Care Requirements</h2>
+            <div className="p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3">Care Requirements</h2>
               <div className="bg-gray-50 rounded-lg p-8 text-center">
                 <Heart size={48} className="mx-auto text-gray-400 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Care Requirements Section</h3>
@@ -500,8 +507,8 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
           )}
 
           {currentTab === 3 && (
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Additional Details</h2>
+            <div className="p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3">Additional Details</h2>
               <div className="bg-gray-50 rounded-lg p-8 text-center">
                 <FileText size={48} className="mx-auto text-gray-400 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Additional Details Section</h3>
@@ -514,25 +521,29 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
           )}
 
           {/* Form Actions */}
-          <div className="border-t border-gray-100 p-6">
-            <div className="flex justify-between">
+          <div className="border-t border-gray-200 p-4 sm:p-6 bg-gray-50 sticky bottom-0">
+            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0">
               <div>
                 {currentTab > 1 && (
                   <Button
                     variant="secondary"
+                    size="md"
                     onClick={handlePreviousTab}
                     icon={<ArrowLeft size={16} />}
                     iconPosition="left"
+                    className="w-full sm:w-auto min-h-[44px]"
                   >
                     Previous
                   </Button>
                 )}
               </div>
               
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
                 <Button
                   variant="ghost"
+                  size="md"
                   onClick={handleCancel}
+                  className="w-full sm:w-auto min-h-[44px] order-2 sm:order-1"
                 >
                   Cancel
                 </Button>
@@ -540,16 +551,20 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                 {currentTab < 3 ? (
                   <Button
                     variant="primary"
+                    size="md"
                     onClick={handleNextTab}
                     icon={<ArrowRight size={16} />}
                     iconPosition="right"
+                    className="w-full sm:w-auto min-h-[44px] order-1 sm:order-2"
                   >
                     Next
                   </Button>
                 ) : (
                   <Button
                     variant="success"
+                    size="md"
                     onClick={() => console.log('Save client')}
+                    className="w-full sm:w-auto min-h-[44px] order-1 sm:order-2"
                   >
                     Save Client
                   </Button>
