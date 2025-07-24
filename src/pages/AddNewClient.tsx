@@ -237,10 +237,9 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-4xl mx-auto">
+      
+      <div className="mx-auto">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-          <div className="px-4 py-4 sm:px-6">
             {/* Back Button */}
             <button
               onClick={handleCancel}
@@ -250,6 +249,10 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
               <span>Back</span>
             </button>
 
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10 rounded-tr-xl rounded-tl-xl">
+          <div className="px-4 py-4 sm:px-6">
+        
+
             {/* Main Heading */}
             <div className="mb-6">
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Add New Client</h1>
@@ -258,10 +261,10 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
 
           {/* Progress Indicator */}
           <div className="flex items-center justify-center pb-4">
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-2 w-full sm:space-x-4">
             {tabs.map((tab, index) => (
               <React.Fragment key={tab.id}>
-                <div className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all duration-200 min-h-[44px] ${
+                <div className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all w-full justify-center duration-200 min-h-[44px] ${
                   currentTab === tab.id 
                     ? 'bg-primary-600 text-white shadow-sm' 
                     : currentTab > tab.id 
