@@ -33,6 +33,7 @@ export const ROUTES = {
   ALERTS: '/alerts',
   ROTA: '/rota-management',
   CLIENTS: '/client-management',
+  ADD_CLIENT: '/add-client',
   STAFF: '/staff-management',
   EMAR: '/emar',
   TIMESHEETS: '/timesheets',

@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Alerts } from './pages/Alerts';
 import { RotaManagement } from './pages/RotaManagement';
 import { ClientManagement } from './pages/ClientManagement';
+import { AddNewClient } from './pages/AddNewClient';
 import { StaffManagement } from './pages/StaffManagement';
 import { EMAR } from './pages/EMAR';
 import { Timesheets } from './pages/Timesheets';
@@ -33,6 +34,8 @@ function App() {
         return <RotaManagement />;
       case ROUTES.CLIENTS:
         return <ClientManagement />;
+      case ROUTES.ADD_CLIENT:
+        return <AddNewClient />;
       case ROUTES.STAFF:
         return <StaffManagement />;
       case ROUTES.EMAR:

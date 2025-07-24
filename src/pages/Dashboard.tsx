@@ -135,7 +135,7 @@ export const Dashboard: React.FC = () => {
             icon={<Plus size={16} />}
             variant="primary"
             size="md"
-            onClick={() => console.log('Add New Client')}
+            onClick={() => window.location.href = '/add-client'}
           />
           <ActionButton
             label="View Rota"
