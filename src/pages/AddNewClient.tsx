@@ -241,24 +241,24 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
         {/* Header */}
         <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
           <div className="px-4 py-4 sm:px-6">
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-start gap-4 mb-6">
             <Button
               variant="ghost"
               size="md"
               onClick={handleCancel}
               icon={<ArrowLeft size={16} />}
-              className="text-gray-600 hover:text-gray-900 min-w-[44px] min-h-[44px] p-2 -ml-2"
+              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 min-w-[44px] min-h-[44px] p-3 rounded-lg flex-shrink-0 mt-1"
             >
               <span className="sr-only sm:not-sr-only sm:ml-2">Back</span>
             </Button>
-            <div>
+            <div className="flex-1 pt-1">
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Add New Client</h1>
               <p className="text-sm sm:text-base text-gray-600">Complete the client registration process</p>
             </div>
           </div>
 
           {/* Progress Indicator */}
-          <div className="flex items-center justify-center mb-4">
+          <div className="flex items-center justify-center pb-4">
             <div className="flex items-center space-x-2 sm:space-x-4">
             {tabs.map((tab, index) => (
               <React.Fragment key={tab.id}>
