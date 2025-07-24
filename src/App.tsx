@@ -27,7 +27,7 @@ function App() {
   const renderPage = () => {
     switch (currentPath) {
       case ROUTES.DASHBOARD:
-        return <Dashboard />;
+        return <Dashboard onNavigate={handleNavigate} />;
       case ROUTES.ALERTS:
         return <Alerts />;
       case ROUTES.ROTA:
@@ -35,7 +35,7 @@ function App() {
       case ROUTES.CLIENTS:
         return <ClientManagement />;
       case ROUTES.ADD_CLIENT:
-        return <AddNewClient />;
+        return <AddNewClient onNavigate={handleNavigate} />;
       case ROUTES.STAFF:
         return <StaffManagement />;
       case ROUTES.EMAR:

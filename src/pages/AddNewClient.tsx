@@ -39,6 +39,10 @@ interface ValidationErrors {
   [key: string]: string;
 }
 
+interface AddNewClientProps {
+  onNavigate: (path: string) => void;
+}
+
 const genderOptions = [
   { value: '', label: 'Select Gender' },
   { value: 'male', label: 'Male' },
@@ -83,7 +87,7 @@ const preferredGenderOptions = [
   { value: 'female', label: 'Female Carer' }
 ];
 
-export const AddNewClient: React.FC = () => {
+export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
   const [currentTab, setCurrentTab] = useState(1);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [basicInfo, setBasicInfo] = useState<BasicInfoData>({
@@ -224,8 +228,7 @@ export const AddNewClient: React.FC = () => {
   };
 
   const handleCancel = () => {
-    // Navigate back to client management or dashboard
-    window.history.back();
+    onNavigate('/');
   };
 
   const tabs = [

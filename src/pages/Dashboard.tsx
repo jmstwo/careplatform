@@ -19,7 +19,11 @@ import { Input } from '../components/atoms/Input';
 import { DASHBOARD_STATS, DISTRICTS, DATE_RANGES } from '../utils/constants';
 import { format } from 'date-fns';
 
-export const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onNavigate: (path: string) => void;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [filters, setFilters] = useState({
     district: 'All Districts',
     date: format(new Date(), 'yyyy-MM-dd'),
@@ -135,28 +139,28 @@ export const Dashboard: React.FC = () => {
             icon={<Plus size={16} />}
             variant="primary"
             size="md"
-            onClick={() => window.location.href = '/add-client'}
+            onClick={() => handleNavigate('/add-client')}
           />
           <ActionButton
             label="View Rota"
             icon={<Calendar size={16} />}
             variant="success"
             size="md"
-            onClick={() => console.log('View Rota')}
+            onClick={() => onNavigate('/rota-management')}
           />
           <ActionButton
             label="EMAR Charts"
             icon={<FileText size={16} />}
             variant="warning"
             size="md"
-            onClick={() => console.log('EMAR Charts')}
+            onClick={() => onNavigate('/emar')}
           />
           <ActionButton
             label="Settings"
             icon={<Settings size={16} />}
             variant="secondary"
             size="md"
-            onClick={() => console.log('Settings')}
+            onClick={() => onNavigate('/settings')}
           />
         </div>
       </div>
