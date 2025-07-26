@@ -1,9 +1,58 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, MapPin, User, Heart, FileText } from 'lucide-react';
+import { 
+  Edit2, 
+  Calendar, 
+  Clock, 
+  Plus, 
+  Minus, 
+  X, 
+  Search,
+  Copy,
+  Shield,
+  Brain
+} from 'lucide-react';
 import { Button } from '../components/atoms/Button';
 import { Input } from '../components/atoms/Input';
 import { Select } from '../components/atoms/Select';
 import { PostcodeLookup } from '../components/molecules/PostcodeLookup';
+
+interface CareLevel {
+  id: number;
+  name: string;
+  visits: number;
+  defaultSkills: string[];
+  description: string;
+}
+
+interface Visit {
+  id: string;
+  time: string;
+  duration: number;
+  period: 'AM' | 'PM';
+  tasks: string[];
+}
+
+interface DaySchedule {
+  day: string;
+  visits: Visit[];
+  enabled: boolean;
+}
+
+interface CareRequirementsData {
+  district: string;
+  careStartDate: string;
+  careEndDate: string;
+  selectedCareLevel: number | null;
+  additionalSkills: string[];
+  preferredCarer: boolean;
+  carerLanguage: string;
+  genderPreference: string;
+  preferredCarerName: string;
+  weeklySchedule: DaySchedule[];
+  medicalConditions: string[];
+  careNotes: string;
+}
 
 interface BasicInfoData {
   firstName: string;
