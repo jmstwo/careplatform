@@ -1,17 +1,5 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, MapPin, User, Heart, FileText } from 'lucide-react';
-import { 
-  Edit2, 
-  Calendar, 
-  Clock, 
-  Plus, 
-  Minus, 
-  X, 
-  Search,
-  Copy,
-  Shield,
-  Brain
-} from 'lucide-react';
 import { Button } from '../components/atoms/Button';
 import { Input } from '../components/atoms/Input';
 import { Select } from '../components/atoms/Select';
@@ -634,6 +622,65 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
+
+      {/* Daily Edit Modal */}
+      {editingDay && (
+        <div className="visit-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="visit-modal__content bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="visit-modal__header p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Edit {editingDay} Schedule
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<X size={16} />}
+                  onClick={() => setEditingDay(null)}
+                />
+              </div>
+            </div>
+            
+            <div className="visit-modal__body p-6">
+              <p className="text-gray-600 mb-4">
+                Configure visit times and tasks for {editingDay}
+              </p>
+              
+              {/* This would contain the detailed visit editing interface */}
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <p className="text-gray-600">
+                  Detailed visit editing interface would be implemented here with:
+                </p>
+                <ul className="text-sm text-gray-500 mt-2 space-y-1">
+                  <li>• Editable time fields for each visit</li>
+                  <li>• Duration adjustment controls</li>
+                  <li>• Task assignment with searchable multi-select</li>
+                  <li>• Add/delete visit functionality</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="visit-modal__footer p-6 border-t border-gray-200">
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => setEditingDay(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => setEditingDay(null)}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
