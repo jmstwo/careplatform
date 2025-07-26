@@ -1,18 +1,4 @@
-  FileText,
-  Edit2, 
-  Calendar, 
-  Clock, 
-  Plus, 
-  Minus, 
-  X, 
-  Search,
-  Copy,
-  Shield,
-  Brain,
-  Pill,
-  Users,
-  Home
-import { ArrowLeft, ArrowRight, MapPin, User, Heart, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MapPin, User, Heart, FileText, Edit2, Calendar, Clock, Plus, X, Search, Copy, Shield, Brain } from 'lucide-react';
 import { Button } from '../components/atoms/Button';
 import { Input } from '../components/atoms/Input';
 import { Select } from '../components/atoms/Select';
