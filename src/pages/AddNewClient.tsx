@@ -4,6 +4,7 @@ import { Input } from '../components/atoms/Input';
 import { Select } from '../components/atoms/Select';
 import { PostcodeLookup } from '../components/molecules/PostcodeLookup';
 import { format, differenceInDays, differenceInWeeks } from 'date-fns';
+import React, { useState, useEffect } from 'react';
 
 const CARE_LEVELS = [
   {
@@ -484,115 +485,6 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
 
   const handleCancel = () => {
     onNavigate('/');
-  };
-
-    if (careRequirements.selectedCareLevel) {
-      const careLevel = CARE_LEVELS.find(level => level.id === careRequirements.selectedCareLevel);
-      if (careLevel) {
-        const newSchedule = careRequirements.weeklySchedule.map(daySchedule => ({
-          ...daySchedule,
-          visits: generateDefaultVisits(careLevel.visits)
-        }));
-        setCareRequirements(prev => ({ ...prev, weeklySchedule: newSchedule }));
-      }
-    }
-  }, [careRequirements.selectedCareLevel]);
-
-  const generateDefaultVisits = (visitCount: number): Visit[] => {
-    const visits: Visit[] = [];
-    
-    for (let i = 0; i < visitCount; i++) {
-      const period = i < Math.ceil(visitCount / 2) ? 'AM' : 'PM';
-      visits.push({
-        id: `visit-${i}`,
-        time: '',
-        duration: 30,
-        period,
-        tasks: []
-      });
-    }
-    
-    return visits;
-  };
-
-  const handleCareLevel = (levelId: number) => {
-    const careLevel = CARE_LEVELS.find(level => level.id === levelId);
-    if (careLevel) {
-      setCareRequirements(prev => ({
-        ...prev,
-        selectedCareLevel: levelId,
-        additionalSkills: prev.additionalSkills.filter(skill => 
-          !careLevel.defaultSkills.includes(skill)
-        )
-      }));
-    }
-  };
-
-  const addSkill = (skill: string) => {
-    if (!careRequirements.additionalSkills.includes(skill)) {
-      setCareRequirements(prev => ({
-        ...prev,
-        additionalSkills: [...prev.additionalSkills, skill]
-      }));
-    }
-    setSkillSearch('');
-  };
-
-  const removeSkill = (skill: string) => {
-    setCareRequirements(prev => ({
-      ...prev,
-      additionalSkills: prev.additionalSkills.filter(s => s !== skill)
-    }));
-  };
-
-  const getAvailableSkills = () => {
-    const selectedLevel = CARE_LEVELS.find(level => level.id === careRequirements.selectedCareLevel);
-    const usedSkills = selectedLevel ? selectedLevel.defaultSkills : [];
-    
-    return ALL_SKILLS.filter(skill => 
-      !usedSkills.includes(skill) && 
-      !careRequirements.additionalSkills.includes(skill) &&
-      skill.toLowerCase().includes(skillSearch.toLowerCase())
-    );
-  };
-
-  const getAllCurrentSkills = () => {
-    const selectedLevel = CARE_LEVELS.find(level => level.id === careRequirements.selectedCareLevel);
-    const defaultSkills = selectedLevel ? selectedLevel.defaultSkills : [];
-    return [...defaultSkills, ...careRequirements.additionalSkills];
-  };
-
-  const addMedicalCondition = () => {
-    if (conditionInput.trim() && !careRequirements.medicalConditions.includes(conditionInput.trim())) {
-      setCareRequirements(prev => ({
-        ...prev,
-        medicalConditions: [...prev.medicalConditions, conditionInput.trim()]
-      }));
-      setConditionInput('');
-    }
-  };
-
-  const removeMedicalCondition = (condition: string) => {
-    setCareRequirements(prev => ({
-      ...prev,
-      medicalConditions: prev.medicalConditions.filter(c => c !== condition)
-    }));
-  };
-
-  const copyDayToRemaining = (dayIndex: number) => {
-    const sourceDay = careRequirements.weeklySchedule[dayIndex];
-    const newSchedule = careRequirements.weeklySchedule.map((day, index) => 
-      index > dayIndex ? { ...day, visits: [...sourceDay.visits] } : day
-    );
-    setCareRequirements(prev => ({ ...prev, weeklySchedule: newSchedule }));
-  };
-
-  const copyDayToAll = (dayIndex: number) => {
-    const sourceDay = careRequirements.weeklySchedule[dayIndex];
-    const newSchedule = careRequirements.weeklySchedule.map((day, index) => 
-      index !== dayIndex ? { ...day, visits: [...sourceDay.visits] } : day
-    );
-    setCareRequirements(prev => ({ ...prev, weeklySchedule: newSchedule }));
   };
 
   const tabs = [
