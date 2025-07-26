@@ -486,30 +486,6 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
     onNavigate('/');
   };
 
-  // Calculate care duration
-  const calculateDuration = () => {
-    if (!careRequirements.careStartDate || !careRequirements.careEndDate) return '';
-    
-    const start = new Date(careRequirements.careStartDate);
-    const end = new Date(careRequirements.careEndDate);
-    const totalDays = differenceInDays(end, start);
-    
-    if (totalDays < 7) {
-      return `${totalDays} days`;
-    }
-    
-    const weeks = differenceInWeeks(end, start);
-    const remainingDays = totalDays - (weeks * 7);
-    
-    if (remainingDays === 0) {
-      return `${weeks} weeks`;
-    }
-    
-    return `${weeks} weeks ${remainingDays} days`;
-  };
-
-  // Update weekly schedule when care level changes
-  useEffect(() => {
     if (careRequirements.selectedCareLevel) {
       const careLevel = CARE_LEVELS.find(level => level.id === careRequirements.selectedCareLevel);
       if (careLevel) {
