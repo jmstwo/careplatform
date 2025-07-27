@@ -161,7 +161,6 @@ export const PostcodeLookup: React.FC<PostcodeLookupProps> = ({
             error={error || searchError}
             placeholder="e.g., SW1A 2AA"
             icon={<MapPin size={16} />}
-            className="pl-8" // 👈 Add custom padding-left here
           />
         </div>
         <div className="flex items-end">
