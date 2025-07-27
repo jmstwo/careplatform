@@ -760,13 +760,346 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
           {currentTab === 2 && (
             <div className="p-4 sm:p-6 care-requirements-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Care Requirements</h2>
-              <div className="bg-gray-50 rounded-lg p-8 text-center placeholder-content">
-                <Heart size={48} className="mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Care Requirements Section</h3>
-                <p className="text-gray-600">
-                  This section will contain care requirements configuration.
-                  The full implementation is ready but temporarily simplified to resolve errors.
-                </p>
+              
+              <div className="space-y-6 form-sections">
+                {/* Client Assignment Section */}
+                <div className="care-requirements__section bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <MapPin size={20} className="text-blue-600" />
+                      <p className="text-gray-900">
+                        Based upon client's home location, this client will be assigned to{' '}
+                        <span className="font-semibold text-blue-600">{careRequirements.district}</span>
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={<Edit2 size={16} />}
+                      onClick={() => console.log('Edit district')}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Care Duration Section */}
+                <div className="care-requirements__section bg-white rounded-lg p-6 border border-gray-100">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <Calendar size={20} />
+                    Care Duration
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Input
+                      label="Care Start Date *"
+                      type="date"
+                      value={careRequirements.careStartDate}
+                      onChange={(e) => setCareRequirements(prev => ({ ...prev, careStartDate: e.target.value }))}
+                    />
+                    <Input
+                      label="Care End Date *"
+                      type="date"
+                      value={careRequirements.careEndDate}
+                      onChange={(e) => setCareRequirements(prev => ({ ...prev, careEndDate: e.target.value }))}
+                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Care Duration
+                      </label>
+                      <div className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-50 min-h-[44px] flex items-center">
+                        <span className="text-gray-900 font-medium">
+                          {calculateDuration() || 'Select dates'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Care Level Selection */}
+                <div className="care-requirements__section bg-white rounded-lg p-6 border border-gray-100">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <Heart size={20} />
+                    Care Level Selection
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {CARE_LEVELS.map((level) => (
+                      <button
+                        key={level.id}
+                        onClick={() => handleCareLevel(level.id)}
+                        className={`care-level__button p-4 rounded-lg border-2 transition-all duration-200 text-left ${
+                          careRequirements.selectedCareLevel === level.id
+                            ? 'care-level__button--selected border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-gray-300 bg-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-gray-900">{level.name}</h4>
+                          <span className="text-sm text-gray-600">({level.description})</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {level.defaultSkills.map((skill) => (
+                            <span
+                              key={skill}
+                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Skills Management */}
+                {careRequirements.selectedCareLevel && (
+                  <div className="care-requirements__section bg-white rounded-lg p-6 border border-gray-100">
+                    <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
+                      <Shield size={20} />
+                      Care Skills & Requirements
+                    </h3>
+                    
+                    {/* Current Skills Display */}
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Current Skills:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {getAllCurrentSkills().map((skill) => {
+                          const isDefault = CARE_LEVELS.find(l => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill);
+                          return (
+                            <span
+                              key={skill}
+                              className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${
+                                isDefault 
+                                  ? 'bg-blue-100 text-blue-800' 
+                                  : 'bg-green-100 text-green-800'
+                              }`}
+                            >
+                              {skill}
+                              {!isDefault && (
+                                <button
+                                  onClick={() => removeSkill(skill)}
+                                  className="ml-2 text-green-600 hover:text-green-800"
+                                >
+                                  <X size={14} />
+                                </button>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Add Additional Skills */}
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Add Additional Skills:</h4>
+                      <div className="relative">
+                        <Input
+                          placeholder="Search for skills..."
+                          value={skillSearch}
+                          onChange={(e) => setSkillSearch(e.target.value)}
+                          icon={<Search size={16} />}
+                        />
+                        {skillSearch && getAvailableSkills().length > 0 && (
+                          <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 mt-1">
+                            {getAvailableSkills().map((skill) => (
+                              <button
+                                key={skill}
+                                onClick={() => addSkill(skill)}
+                                className="w-full text-left px-3 py-2 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+                              >
+                                {skill}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Carer Preferences Section */}
+                <div className="care-requirements__section bg-white rounded-lg p-6 border border-gray-100">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <User size={20} />
+                    Carer Preferences
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    {/* Preferred Carer Toggle */}
+                    <div className="flex items-center gap-3">
+                      <label className="text-sm font-medium text-gray-700">Preferred Carer:</label>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={careRequirements.preferredCarer ? "primary" : "secondary"}
+                          size="sm"
+                          onClick={() => setCareRequirements(prev => ({ ...prev, preferredCarer: true }))}
+                        >
+                          Yes
+                        </Button>
+                        <Button
+                          variant={!careRequirements.preferredCarer ? "primary" : "secondary"}
+                          size="sm"
+                          onClick={() => setCareRequirements(prev => ({ ...prev, preferredCarer: false }))}
+                        >
+                          No
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Select
+                        label="Carer Language"
+                        options={LANGUAGES}
+                        value={careRequirements.carerLanguage}
+                        onChange={(e) => setCareRequirements(prev => ({ ...prev, carerLanguage: e.target.value }))}
+                      />
+                      <Select
+                        label="Gender Preference"
+                        options={GENDER_PREFERENCES}
+                        value={careRequirements.genderPreference}
+                        onChange={(e) => setCareRequirements(prev => ({ ...prev, genderPreference: e.target.value }))}
+                      />
+                    </div>
+
+                    {careRequirements.preferredCarer && (
+                      <Select
+                        label="Preferred Carer Name"
+                        options={DUMMY_CARERS}
+                        value={careRequirements.preferredCarerName}
+                        onChange={(e) => setCareRequirements(prev => ({ ...prev, preferredCarerName: e.target.value }))}
+                        placeholder="Select a carer"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Weekly Schedule Management */}
+                {careRequirements.selectedCareLevel && (
+                  <div className="care-requirements__section bg-white rounded-lg p-6 border border-gray-100">
+                    <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
+                      <Clock size={20} />
+                      Weekly Schedule
+                    </h3>
+                    
+                    <div className="grid grid-cols-2 sm:grid-cols-7 gap-3">
+                      {careRequirements.weeklySchedule.map((daySchedule, index) => (
+                        <div
+                          key={daySchedule.day}
+                          className={`weekly-schedule__day border rounded-lg p-3 ${
+                            daySchedule.enabled ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-xs sm:text-sm text-gray-900">
+                              {window.innerWidth < 640 ? daySchedule.day.slice(0, 3) : daySchedule.day}
+                            </h4>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              icon={<Edit2 size={12} />}
+                              onClick={() => setEditingDay(daySchedule.day)}
+                              className="p-1"
+                            />
+                          </div>
+                          
+                          <div className="space-y-1 mb-3">
+                            <div className="text-xs text-gray-600">
+                              AM: {daySchedule.visits.filter(v => v.period === 'AM').length}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              PM: {daySchedule.visits.filter(v => v.period === 'PM').length}
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              icon={<Copy size={10} />}
+                              onClick={() => copyDayToRemaining(index)}
+                              className="w-full text-xs p-1"
+                            >
+                              Copy →
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              icon={<Copy size={10} />}
+                              onClick={() => copyDayToAll(index)}
+                              className="w-full text-xs p-1"
+                            >
+                              Copy All
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional Information */}
+                <div className="care-requirements__section bg-white rounded-lg p-6 border border-gray-100">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <Brain size={20} />
+                    Additional Information
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    {/* Medical Conditions */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Medical Conditions
+                      </label>
+                      <div className="flex gap-2 mb-2">
+                        <Input
+                          placeholder="Enter medical condition"
+                          value={conditionInput}
+                          onChange={(e) => setConditionInput(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && addMedicalCondition()}
+                        />
+                        <Button
+                          variant="primary"
+                          size="md"
+                          icon={<Plus size={16} />}
+                          onClick={addMedicalCondition}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {careRequirements.medicalConditions.map((condition) => (
+                          <span
+                            key={condition}
+                            className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-red-100 text-red-800"
+                          >
+                            {condition}
+                            <button
+                              onClick={() => removeMedicalCondition(condition)}
+                              className="ml-2 text-red-600 hover:text-red-800"
+                            >
+                              <X size={14} />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Care Notes */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Care Plan/Notes
+                      </label>
+                      <textarea
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-h-[120px] placeholder:text-gray-400"
+                        placeholder="Enter detailed care plan notes, special instructions, or important information..."
+                        value={careRequirements.careNotes}
+                        onChange={(e) => setCareRequirements(prev => ({ ...prev, careNotes: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
