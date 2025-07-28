@@ -230,7 +230,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
     district: 'North District',
     careStartDate: '',
     careEndDate: '',
-    selectedCareLevel: null,
+    selectedCareLevel: 1,
     additionalSkills: [],
     preferredCarer: false,
     carerLanguage: 'english',
@@ -239,7 +239,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
     weeklySchedule: DAYS_OF_WEEK.map(day => ({
       day,
       visits: [],
-      enabled: true
+      enabled: true 
     })),
     medicalConditions: [],
     careNotes: ''
@@ -552,7 +552,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
 
         {/* Form Content */}
         <div className="bg-white form-content">
-          {currentTab === 1 && (
+          {currentTab === 2 && (
             <div className="p-4 sm:p-6 basic-info-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Basic Information</h2>
               
@@ -757,7 +757,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
             </div>
           )}
 
-          {currentTab === 2 && (
+          {currentTab === 1 && (
             <div className="p-4 sm:p-6 care-requirements-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Care Requirements</h2>
               
@@ -808,7 +808,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                         Care Duration
                       </label>
                       <div className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-50 min-h-[44px] flex items-center">
-                        <span className="text-gray-900 font-medium">
+                        <span className="text-gray-900">
                           {calculateDuration() || 'Select dates'}
                         </span>
                       </div>
