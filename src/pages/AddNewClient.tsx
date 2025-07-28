@@ -555,7 +555,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
 
         {/* Form Content */}
         <div className="bg-white form-content">
-          {currentTab === 2 && (
+          {currentTab === 1 && (
             <div className="p-4 sm:p-6 basic-info-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Basic Information</h2>
               
@@ -760,7 +760,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
             </div>
           )}
 
-          {currentTab === 1 && (
+          {currentTab === 2 && (
             <div className="p-4 sm:p-6 care-requirements-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Care Requirements</h2>
               
