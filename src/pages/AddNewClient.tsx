@@ -5,6 +5,7 @@ import { Select } from '../components/atoms/Select';
 import { PostcodeLookup } from '../components/molecules/PostcodeLookup';
 import { format, differenceInDays, differenceInWeeks } from 'date-fns';
 import React, { useState, useEffect } from 'react';
+import { ChevronUp, ChevronDown } from 'lucide-react'; 
 
 const CARE_LEVELS = [
   {
@@ -467,6 +468,8 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
     }));
   };
 
+  const [skillDropdownOpen, setSkillDropdownOpen] = useState<boolean>(false);
+
   const handleNextTab = () => {
     if (currentTab === 1) {
       if (validateBasicInfo()) {
@@ -892,32 +895,156 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                     </div>
 
                     {/* Add Additional Skills */}
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-2">Add Additional Skills:</h4>
-                      <div className="relative">
-                        <Input
-                          placeholder="Search for skills..."
-                          value={skillSearch}
-                          onChange={(e) => setSkillSearch(e.target.value)}
-                          icon={<Search size={16} />}
-                        />
-                        {skillSearch && getAvailableSkills().length > 0 && (
-                          <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 mt-1">
-                            {getAvailableSkills().map((skill) => (
-                              <button
-                                key={skill}
-                                onClick={() => addSkill(skill)}
-                                className="w-full text-left px-3 py-2 hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
-                              >
-                                {skill}
-                              </button>
-                            ))}
-                          </div>
+              {/* Add Additional Skills - Multi-Select */}
+              <div>
+      <h4 className="text-sm font-medium text-gray-700 mb-2">Add Additional Skills:</h4>
+      <div 
+        className="relative" 
+        onBlur={() => {
+          // Small delay to allow clicks inside dropdown to process first
+          setTimeout(() => {
+            setSkillDropdownOpen(false);
+            setSkillSearch('');
+          }, 150);
+        }}
+        tabIndex={0}
+      >
+        {/* Multi-Select Input - Click to Open */}
+        <div 
+          className="relative cursor-pointer"
+          onClick={() => setSkillDropdownOpen(!skillDropdownOpen)}
+        >
+          <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white flex items-center justify-between min-h-[40px]">
+            <div className="flex-1">
+              {getAllCurrentSkills().filter((skill: string) => 
+                !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill)
+              ).length > 0 ? (
+                <div className="flex flex-wrap gap-1">
+                  {getAllCurrentSkills()
+                    .filter((skill: string) => !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill))
+                    .slice(0, 3) // Show first 3
+                    .map((skill: string) => (
+                      <span
+                        key={skill}
+                        className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800"
+                      >
+                        {skill}
+                        <button
+                          onClick={(e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            removeSkill(skill);
+                          }}
+                          className="ml-1 text-blue-600 hover:text-blue-800"
+                        >
+                          <X size={10} />
+                        </button>
+                      </span>
+                    ))
+                  }
+                  {getAllCurrentSkills().filter((skill: string) => 
+                    !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill)
+                  ).length > 3 && (
+                    <span className="text-xs text-gray-500 px-2 py-0.5">
+                      +{getAllCurrentSkills().filter((skill: string) => 
+                        !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill)
+                      ).length - 3} more
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <span className="text-gray-400 text-sm">Select additional skills...</span>
+              )}
+            </div>
+            <div className="ml-2 text-gray-400">
+              {skillDropdownOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
+          </div>
+        </div>
+        
+        {/* Multi-Select Dropdown */}
+        {skillDropdownOpen && (
+          <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 mt-1 max-h-60 overflow-hidden">
+            {/* Search Input */}
+            <div className="p-3 border-b border-gray-100">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                <input
+                  type="text"
+                  placeholder="Search skills..."
+                  value={skillSearch}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSkillSearch(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+            
+            {/* Options List */}
+            <div className="max-h-40 overflow-y-auto">
+              {getAvailableSkills().length > 0 ? (
+                <>
+                  {/* Select All Option */}
+                  <div className="px-3 py-2 border-b border-gray-100 bg-gray-50">
+                    <button
+                      onClick={(e: React.MouseEvent) => {
+                        e.stopPropagation();
+                        getAvailableSkills().forEach((skill: string) => addSkill(skill));
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Select All Visible ({getAvailableSkills().length})
+                    </button>
+                  </div>
+                  
+                  {getAvailableSkills().map((skill: string) => {
+                    const isSelected = getAllCurrentSkills().includes(skill);
+                    return (
+                      <div
+                        key={skill}
+                        className={`flex items-center justify-between px-3 py-2 hover:bg-gray-50 cursor-pointer ${
+                          isSelected ? 'bg-blue-50' : ''
+                        }`}
+                        onClick={(e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          if (isSelected) {
+                            removeSkill(skill);
+                          } else {
+                            addSkill(skill);
+                          }
+                        }}
+                      >
+                        <span className={`text-sm ${isSelected ? 'text-blue-900 font-medium' : 'text-gray-900'}`}>
+                          {skill}
+                        </span>
+                        {isSelected && (
+                          <Check size={16} className="text-blue-600" />
                         )}
                       </div>
-                    </div>
-                  </div>
-                )}
+                    );
+                  })}
+                </>
+              ) : (
+                <div className="px-3 py-4 text-center text-sm text-gray-500">
+                  {skillSearch ? 'No skills match your search' : 'No additional skills available'}
+                </div>
+              )}
+            </div>
+            
+            {/* Footer - Selection Count */}
+            <div className="p-3 border-t border-gray-100 bg-gray-50">
+              <span className="text-xs text-gray-600">
+                {getAllCurrentSkills().filter((skill: string) => 
+                  !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill)
+                ).length} selected
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
 
                 {/* Carer Preferences Section */}
                 <div className="care-requirements__section bg-white rounded-lg p-6 border border-gray-100">
@@ -1004,7 +1131,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                             />
                           </div>
                           
-                          <div className="space-y-1 mb-3">
+                          <div className="flex mb-3 gap-2">
                             <div className="text-xs text-gray-600">
                               AM: {daySchedule.visits.filter(v => v.period === 'AM').length}
                             </div>
@@ -1092,7 +1219,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                         Care Plan/Notes
                       </label>
                       <textarea
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-h-[120px] placeholder:text-gray-400"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-h-[120px] placeholder:text-gray-400"
                         placeholder="Enter detailed care plan notes, special instructions, or important information..."
                         value={careRequirements.careNotes}
                         onChange={(e) => setCareRequirements(prev => ({ ...prev, careNotes: e.target.value }))}
