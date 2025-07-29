@@ -1,11 +1,12 @@
-import { ArrowLeft, ArrowRight, MapPin, User, Heart, FileText, Edit2, Calendar, Clock, Plus, X, Search, Copy, Shield, Brain } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MapPin, User, Heart, FileText, Edit2, Calendar, Clock, Plus, X, Search, Copy, Shield, Brain, Check } from 'lucide-react';
 import { Button } from '../components/atoms/Button';
 import { Input } from '../components/atoms/Input';
 import { Select } from '../components/atoms/Select';
 import { PostcodeLookup } from '../components/molecules/PostcodeLookup';
 import { format, differenceInDays, differenceInWeeks } from 'date-fns';
 import React, { useState, useEffect } from 'react';
-import { ChevronUp, ChevronDown } from 'lucide-react'; 
+import { ChevronUp, ChevronDown, Trash2 } from 'lucide-react'; 
+import { MultiSelect } from '../components/atoms/MultiSelect';
 
 const CARE_LEVELS = [
   {
@@ -268,10 +269,10 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
     return `${weeks} weeks ${remainingDays} days`;
   };
 
-  const generateDefaultVisits = (visitCount: number) => {
-    const visits = [];
+  const generateDefaultVisits = (visitCount: number): Visit[] => {
+    const visits: Visit[] = [];
     for (let i = 0; i < visitCount; i++) {
-      const period = i < Math.ceil(visitCount / 2) ? 'AM' : 'PM';
+      const period: 'AM' | 'PM' = i < Math.ceil(visitCount / 2) ? 'AM' : 'PM';
       visits.push({
         id: `visit-${i}`,
         time: '',
@@ -372,7 +373,10 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
           ...daySchedule,
           visits: generateDefaultVisits(careLevel.visits)
         }));
-        setCareRequirements(prev => ({ ...prev, weeklySchedule: newSchedule }));
+        setCareRequirements(prev => ({ 
+          ...prev, 
+          weeklySchedule: newSchedule 
+        }));
       }
     }
   }, [careRequirements.selectedCareLevel]);
@@ -428,7 +432,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
       setBasicInfo(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof BasicInfoData],
+          ...((typeof prev[parent as keyof BasicInfoData] === 'object' && prev[parent as keyof BasicInfoData] !== null && !Array.isArray(prev[parent as keyof BasicInfoData]) ? prev[parent as keyof BasicInfoData] as object : {})),
           [child]: value
         }
       }));
@@ -470,6 +474,36 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
 
   const [skillDropdownOpen, setSkillDropdownOpen] = useState<boolean>(false);
 
+  const updateVisitCount = (dayIndex: number, period: 'AM' | 'PM', count: number) => {
+    setCareRequirements(prev => {
+      const newSchedule = [...prev.weeklySchedule];
+      const currentDay = newSchedule[dayIndex];
+
+      const otherVisits = currentDay.visits.filter(v => v.period !== period);
+
+      const newVisits = [
+        ...otherVisits,
+        ...Array(count).fill(null).map((_, index) => ({
+          id: `visit-${period}-${index}`,
+          time: '',
+          duration: 30,
+          period,
+          tasks: []
+        }))
+      ];
+
+      newSchedule[dayIndex] = {
+        ...currentDay,
+        visits: newVisits
+      };
+
+      return {
+        ...prev,
+        weeklySchedule: newSchedule
+      };
+    });
+  };
+
   const handleNextTab = () => {
     if (currentTab === 1) {
       if (validateBasicInfo()) {
@@ -495,6 +529,88 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
     { id: 2, label: 'Care Requirements', icon: <Heart size={16} /> },
     { id: 3, label: 'Additional Details', icon: <FileText size={16} /> }
   ];
+
+  const ALL_TASKS = [
+    'Medication',
+    'Personal Care',
+    'Meal Preparation',
+    'Mobility Support',
+    'Companionship',
+    'Housekeeping',
+    'Wound Care',
+    'Toileting',
+    'Other',
+  ];
+
+  // State for editing visits in the popup
+  const [visitEdits, setVisitEdits] = useState<Visit[]>([]);
+  useEffect(() => {
+    if (editingDay) {
+      const dayObj = careRequirements.weeklySchedule.find(d => d.day === editingDay);
+      setVisitEdits(dayObj ? JSON.parse(JSON.stringify(dayObj.visits)) : []);
+    }
+  }, [editingDay]);
+
+  // For MultiSelect options
+  const ALL_TASK_OPTIONS = [
+    { value: 'medication', label: 'Medication' },
+    { value: 'personal-care', label: 'Personal Care' },
+    { value: 'meal-preparation', label: 'Meal Preparation' },
+    { value: 'mobility-support', label: 'Mobility Support' },
+    { value: 'companionship', label: 'Companionship' },
+    { value: 'housekeeping', label: 'Housekeeping' },
+    { value: 'wound-care', label: 'Wound Care' },
+    { value: 'toileting', label: 'Toileting' },
+    { value: 'other', label: 'Other' },
+  ];
+  const ALL_SKILL_OPTIONS = ALL_SKILLS.map(skill => ({ value: skill, label: skill }));
+
+  // Remove period dropdown, infer period from time
+  const handleVisitChange = (index: number, field: keyof Visit, value: any) => {
+    setVisitEdits(prev => prev.map((v, i) => {
+      if (i !== index) return v;
+      let updated = { ...v, [field]: value };
+      return updated;
+    }));
+  };
+
+  const handleTaskToggle = (visitIdx: number, task: string) => {
+    setVisitEdits(prev => prev.map((v, i) => {
+      if (i !== visitIdx) return v;
+      const hasTask = v.tasks.includes(task);
+      return {
+        ...v,
+        tasks: hasTask ? v.tasks.filter(t => t !== task) : [...v.tasks, task],
+      };
+    }));
+  };
+
+  const handleDeleteVisit = (index: number) => {
+    setVisitEdits(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddVisit = () => {
+    setVisitEdits(prev => [
+      ...prev,
+      {
+        id: `visit-${Date.now()}`,
+        time: '',
+        duration: 30,
+        period: 'AM',
+        tasks: [],
+      },
+    ]);
+  };
+
+  const handleSaveVisits = () => {
+    setCareRequirements(prev => ({
+      ...prev,
+      weeklySchedule: prev.weeklySchedule.map(day =>
+        day.day === editingDay ? { ...day, visits: visitEdits } : day
+      ),
+    }));
+    setEditingDay(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 add-client-page">
@@ -555,7 +671,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
 
         {/* Form Content */}
         <div className="bg-white form-content">
-          {currentTab === 1 && (
+          {currentTab === 2 && (
             <div className="p-4 sm:p-6 basic-info-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Basic Information</h2>
               
@@ -760,7 +876,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
             </div>
           )}
 
-          {currentTab === 2 && (
+          {currentTab === 1 && (
             <div className="p-4 sm:p-6 care-requirements-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Care Requirements</h2>
               
@@ -897,150 +1013,14 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                     {/* Add Additional Skills */}
               {/* Add Additional Skills - Multi-Select */}
               <div>
-      <h4 className="text-sm font-medium text-gray-700 mb-2">Add Additional Skills:</h4>
-      <div 
-        className="relative" 
-        onBlur={() => {
-          // Small delay to allow clicks inside dropdown to process first
-          setTimeout(() => {
-            setSkillDropdownOpen(false);
-            setSkillSearch('');
-          }, 150);
-        }}
-        tabIndex={0}
-      >
-        {/* Multi-Select Input - Click to Open */}
-        <div 
-          className="relative cursor-pointer"
-          onClick={() => setSkillDropdownOpen(!skillDropdownOpen)}
-        >
-          <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white flex items-center justify-between min-h-[40px]">
-            <div className="flex-1">
-              {getAllCurrentSkills().filter((skill: string) => 
-                !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill)
-              ).length > 0 ? (
-                <div className="flex flex-wrap gap-1">
-                  {getAllCurrentSkills()
-                    .filter((skill: string) => !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill))
-                    .slice(0, 3) // Show first 3
-                    .map((skill: string) => (
-                      <span
-                        key={skill}
-                        className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800"
-                      >
-                        {skill}
-                        <button
-                          onClick={(e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            removeSkill(skill);
-                          }}
-                          className="ml-1 text-blue-600 hover:text-blue-800"
-                        >
-                          <X size={10} />
-                        </button>
-                      </span>
-                    ))
-                  }
-                  {getAllCurrentSkills().filter((skill: string) => 
-                    !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill)
-                  ).length > 3 && (
-                    <span className="text-xs text-gray-500 px-2 py-0.5">
-                      +{getAllCurrentSkills().filter((skill: string) => 
-                        !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill)
-                      ).length - 3} more
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <span className="text-gray-400 text-sm">Select additional skills...</span>
-              )}
-            </div>
-            <div className="ml-2 text-gray-400">
-              {skillDropdownOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </div>
-          </div>
-        </div>
-        
-        {/* Multi-Select Dropdown */}
-        {skillDropdownOpen && (
-          <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 mt-1 max-h-60 overflow-hidden">
-            {/* Search Input */}
-            <div className="p-3 border-b border-gray-100">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                <input
-                  type="text"
-                  placeholder="Search skills..."
-                  value={skillSearch}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSkillSearch(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                />
-              </div>
-            </div>
-            
-            {/* Options List */}
-            <div className="max-h-40 overflow-y-auto">
-              {getAvailableSkills().length > 0 ? (
-                <>
-                  {/* Select All Option */}
-                  <div className="px-3 py-2 border-b border-gray-100 bg-gray-50">
-                    <button
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        getAvailableSkills().forEach((skill: string) => addSkill(skill));
-                      }}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Select All Visible ({getAvailableSkills().length})
-                    </button>
-                  </div>
-                  
-                  {getAvailableSkills().map((skill: string) => {
-                    const isSelected = getAllCurrentSkills().includes(skill);
-                    return (
-                      <div
-                        key={skill}
-                        className={`flex items-center justify-between px-3 py-2 hover:bg-gray-50 cursor-pointer ${
-                          isSelected ? 'bg-blue-50' : ''
-                        }`}
-                        onClick={(e: React.MouseEvent) => {
-                          e.stopPropagation();
-                          if (isSelected) {
-                            removeSkill(skill);
-                          } else {
-                            addSkill(skill);
-                          }
-                        }}
-                      >
-                        <span className={`text-sm ${isSelected ? 'text-blue-900 font-medium' : 'text-gray-900'}`}>
-                          {skill}
-                        </span>
-                        {isSelected && (
-                          <Check size={16} className="text-blue-600" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </>
-              ) : (
-                <div className="px-3 py-4 text-center text-sm text-gray-500">
-                  {skillSearch ? 'No skills match your search' : 'No additional skills available'}
-                </div>
-              )}
-            </div>
-            
-            {/* Footer - Selection Count */}
-            <div className="p-3 border-t border-gray-100 bg-gray-50">
-              <span className="text-xs text-gray-600">
-                {getAllCurrentSkills().filter((skill: string) => 
-                  !CARE_LEVELS.find((l: any) => l.id === careRequirements.selectedCareLevel)?.defaultSkills.includes(skill)
-                ).length} selected
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* <h4 className="text-sm font-medium text-gray-700 mb-2">Add Additional Skills:</h4> */}
+      <MultiSelect
+        label="Add Additional Skills:"
+        options={ALL_SKILL_OPTIONS}
+        value={careRequirements.additionalSkills}
+        onChange={skills => setCareRequirements(prev => ({ ...prev, additionalSkills: skills }))}
+        placeholder="Select additional skills..."
+      />
     </div>
   </div>
 )}
@@ -1110,11 +1090,11 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                       Weekly Schedule
                     </h3>
                     
-                    <div className="grid grid-cols-2 sm:grid-cols-7 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-7 gap-3 ">
                       {careRequirements.weeklySchedule.map((daySchedule, index) => (
                         <div
                           key={daySchedule.day}
-                          className={`weekly-schedule__day border rounded-lg p-3 ${
+                          className={`weekly-schedule__day border rounded-lg p-3 relative ${
                             daySchedule.enabled ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50'
                           }`}
                         >
@@ -1127,16 +1107,32 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                               size="sm"
                               icon={<Edit2 size={12} />}
                               onClick={() => setEditingDay(daySchedule.day)}
-                              className="p-1"
-                            />
+                              className="p-1 absolute top-[2px] right-0 hover:border-transparent hover:bg-transparent hover:text-primary-600"
+                            >
+                              {''}
+                            </Button>
                           </div>
                           
-                          <div className="flex mb-3 gap-2">
-                            <div className="text-xs text-gray-600">
-                              AM: {daySchedule.visits.filter(v => v.period === 'AM').length}
+                          <div className="flex mb-3 gap-2 ">
+                            <div className="text-xs text-gray-600 flex items-center gap-1 flex-col">
+                              AM:      <input
+            type="number"
+            min={0}
+            className="w-10 px-1 py-0.5 border border-gray-300 rounded text-center w-full"
+            value={daySchedule.visits.filter(v => v.period === 'AM').length}
+            onChange={(e) => updateVisitCount(index, 'AM', parseInt(e.target.value) || 0)}
+          />
                             </div>
-                            <div className="text-xs text-gray-600">
-                              PM: {daySchedule.visits.filter(v => v.period === 'PM').length}
+                            <div className="text-xs text-gray-600 flex items-center gap-1 flex-col">
+                              PM: 
+                              <input
+            type="number"
+            min={0}
+            className="w-10 px-1 py-0.5 border border-gray-300 rounded text-center w-full"
+            value={daySchedule.visits.filter(v => v.period === 'PM').length}
+            onChange={(e) => updateVisitCount(index, 'PM', parseInt(e.target.value) || 0)}
+          />
+    
                             </div>
                           </div>
 
@@ -1307,7 +1303,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
       {/* Daily Edit Modal */}
       {editingDay && (
         <div className="visit-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="visit-modal__content bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="visit-modal__content bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="visit-modal__header p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -1318,29 +1314,63 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                   size="sm"
                   icon={<X size={16} />}
                   onClick={() => setEditingDay(null)}
-                />
+                >
+                  {''}
+                </Button>
               </div>
             </div>
-            
             <div className="visit-modal__body p-6">
-              <p className="text-gray-600 mb-4">
-                Configure visit times and tasks for {editingDay}
-              </p>
-              
-              {/* This would contain the detailed visit editing interface */}
-              <div className="bg-gray-50 rounded-lg p-4 text-center">
-                <p className="text-gray-600">
-                  Detailed visit editing interface would be implemented here with:
-                </p>
-                <ul className="text-sm text-gray-500 mt-2 space-y-1">
-                  <li>• Editable time fields for each visit</li>
-                  <li>• Duration adjustment controls</li>
-                  <li>• Task assignment with searchable multi-select</li>
-                  <li>• Add/delete visit functionality</li>
-                </ul>
+              <div className="space-y-6">
+                {visitEdits.length === 0 && (
+                  <div className="text-gray-500 text-center">No visits scheduled for this day.</div>
+                )}
+                {visitEdits.map((visit, idx) => (
+                  <div key={visit.id} className="bg-gray-50 rounded-lg p-2 mb-2 border border-gray-200 flex flex-col sm:flex-row items-center gap-2 relative">
+                    <div className="flex-1 grid grid-cols-[auto_1fr_1fr_1fr] gap-3 items-baseline">
+                    <div className="flex items-center justify-center pl-2 pr-2 ">
+                        <span className="text-xs text-gray-500 bg-gray-100 px-1 py-1 border border-gray-200 rounded-md min-h-[20px] flex items-center">
+                          {visit.period || '-'}
+                        </span>
+                      </div>
+                      
+                      <Input
+                        label="Time"
+                        type="time"
+                        value={visit.time}
+                        onChange={e => handleVisitChange(idx, 'time', e.target.value)}
+                      />
+                     
+                      <Input
+                        label="Duration (min)"
+                        type="number"
+                        min={1}
+                        value={visit.duration}
+                        onChange={e => handleVisitChange(idx, 'duration', parseInt(e.target.value) || 0)}
+                        className=""
+                      />
+                      <MultiSelect
+                        label="Tasks"
+                        options={ALL_TASK_OPTIONS}
+                        value={visit.tasks}
+                        onChange={tasks => handleVisitChange(idx, 'tasks', tasks)}
+                        placeholder="Select tasks..."
+                      />
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteVisit(idx)}
+                      icon={<Trash2 size={16} />}
+                      aria-label="Delete visit"
+                      className="mt-0 text-gray-400 hover:border-transparent hover:bg-transparent hover:text-primary-600"
+                    >
+                      {''}
+                    </Button>
+                  </div>
+                ))}
+                <Button variant="secondary" size="sm" onClick={handleAddVisit} icon={<Plus size={16} />}>Add Visit</Button>
               </div>
             </div>
-            
             <div className="visit-modal__footer p-6 border-t border-gray-200">
               <div className="flex justify-end gap-3">
                 <Button
@@ -1353,7 +1383,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                 <Button
                   variant="primary"
                   size="md"
-                  onClick={() => setEditingDay(null)}
+                  onClick={handleSaveVisits}
                 >
                   Save Changes
                 </Button>
