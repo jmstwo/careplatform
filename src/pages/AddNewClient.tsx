@@ -348,12 +348,17 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
     }));
   };
 
-  const copyDayToRemaining = (dayIndex: number) => {
+  const copyDayToNext = (dayIndex: number) => {
     const sourceDay = careRequirements.weeklySchedule[dayIndex];
-    const newSchedule = careRequirements.weeklySchedule.map((day, index) => 
-      index > dayIndex ? { ...day, visits: [...sourceDay.visits] } : day
-    );
-    setCareRequirements(prev => ({ ...prev, weeklySchedule: newSchedule }));
+    const nextDayIndex = dayIndex + 1;
+    
+    // Only copy if there is a next day (not the last day of the week)
+    if (nextDayIndex < careRequirements.weeklySchedule.length) {
+      const newSchedule = careRequirements.weeklySchedule.map((day, index) => 
+        index === nextDayIndex ? { ...day, visits: [...sourceDay.visits] } : day
+      );
+      setCareRequirements(prev => ({ ...prev, weeklySchedule: newSchedule }));
+    }
   };
 
   const copyDayToAll = (dayIndex: number) => {
@@ -671,7 +676,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
 
         {/* Form Content */}
         <div className="bg-white form-content">
-          {currentTab === 2 && (
+          {currentTab === 1 && (
             <div className="p-4 sm:p-6 basic-info-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Basic Information</h2>
               
@@ -876,7 +881,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
             </div>
           )}
 
-          {currentTab === 1 && (
+          {currentTab === 2 && (
             <div className="p-4 sm:p-6 care-requirements-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Care Requirements</h2>
               
@@ -1141,7 +1146,8 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                               variant="ghost"
                               size="sm"
                               icon={<Copy size={10} />}
-                              onClick={() => copyDayToRemaining(index)}
+                              onClick={() => copyDayToNext(index)}
+                              
                               className="w-full text-xs p-1"
                             >
                               Copy →
