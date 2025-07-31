@@ -34,6 +34,7 @@ export const ROUTES = {
   ROTA: '/rota-management',
   CLIENTS: '/client-management',
   ADD_CLIENT: '/add-client',
+  ADD_STAFF: '/add-staff',
   CARE_REQUIREMENTS: '/care-requirements',
   STAFF: '/staff-management',
   EMAR: '/emar',

@@ -7,6 +7,7 @@ import { Alerts } from './pages/Alerts';
 import { RotaManagement } from './pages/RotaManagement';
 import { ClientManagement } from './pages/ClientManagement';
 import { AddNewClient } from './pages/AddNewClient';
+import { AddNewStaff } from './pages/AddNewStaff';
 import { StaffManagement } from './pages/StaffManagement';
 import { EMAR } from './pages/EMAR';
 import { CareRequirements } from './pages/CareRequirements';
@@ -38,6 +39,8 @@ function App() {
         return <ClientManagement />;
       case ROUTES.ADD_CLIENT:
         return <AddNewClient onNavigate={handleNavigate} />;
+      case ROUTES.ADD_STAFF:
+        return <AddNewStaff onNavigate={handleNavigate} />;
       case ROUTES.CARE_REQUIREMENTS:
         return <CareRequirements />;
       case ROUTES.STAFF:

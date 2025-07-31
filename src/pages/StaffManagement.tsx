@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActionButton } from '../components/molecules/ActionButton';
+import { ROUTES } from '../utils/constants';
 import { 
   Plus
 } from 'lucide-react';
@@ -19,7 +20,7 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ onNavigate }) 
             icon={<Plus size={16} />}
             variant="primary"
             size="md"
-            onClick={() => onNavigate?.('/add-staff')}
+            onClick={() => onNavigate?.(ROUTES.ADD_STAFF)}
           />
       </div>
     </div>
