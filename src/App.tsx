@@ -44,7 +44,7 @@ function App() {
       case ROUTES.CARE_REQUIREMENTS:
         return <CareRequirements />;
       case ROUTES.STAFF:
-        return <StaffManagement />;
+        return <StaffManagement onNavigate={handleNavigate} />;
       case ROUTES.EMAR:
         return <EMAR />;
       case ROUTES.TIMESHEETS:
