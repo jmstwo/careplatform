@@ -4,7 +4,7 @@ import { Input } from '../components/atoms/Input';
 import { Select } from '../components/atoms/Select';
 import { PostcodeLookup } from '../components/molecules/PostcodeLookup';
 import { format, differenceInDays, differenceInWeeks } from 'date-fns';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronUp, ChevronDown, Trash2 } from 'lucide-react'; 
 import { MultiSelect } from '../components/atoms/MultiSelect';
 
@@ -246,6 +246,22 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
     medicalConditions: [],
     careNotes: ''
   });
+
+  // Add state for district editing
+  const [showDistrictModal, setShowDistrictModal] = useState(false);
+
+  const AVAILABLE_DISTRICTS = [
+    'North District',
+    'South District', 
+    'East District',
+    'West District',
+    'Central District'
+  ];
+
+  const handleDistrictChange = (newDistrict: string) => {
+    setCareRequirements(prev => ({ ...prev, district: newDistrict }));
+    setShowDistrictModal(false);
+  };
 
   // Calculate care duration
   const calculateDuration = () => {
@@ -532,7 +548,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
   const tabs = [
     { id: 1, label: 'Basic Information', icon: <User size={16} /> },
     { id: 2, label: 'Care Requirements', icon: <Heart size={16} /> },
-    { id: 3, label: 'Additional Details', icon: <FileText size={16} /> }
+    { id: 3, label: 'EMAR', icon: <FileText size={16} /> }
   ];
 
   const ALL_TASKS = [
@@ -617,13 +633,21 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
     setEditingDay(null);
   };
 
+  // Add a ref for the form content
+  const formContentRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when tab changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentTab]);
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20 add-client-page">
       
       <div className="mx-auto add-client-container">
         {/* Header */}
             {/* Back Button */}
-            <Button
+            {/* <Button
               variant="secondary"
               size="md"
               onClick={handleCancel}
@@ -632,7 +656,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
               className="mb-6 hover:-translate-x-0.5 back-button"
             >
               Back
-            </Button>
+            </Button> */}
 
         <div className="bg-white border-b border-gray-200 sticky top-0 z-10 rounded-tr-xl rounded-tl-xl page-header">
           <div className="px-4 py-4 sm:px-6 header-content">
@@ -649,13 +673,37 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
             <div className="flex items-center space-x-2 w-full sm:space-x-4 progress-tabs">
             {tabs.map((tab, index) => (
               <React.Fragment key={tab.id}>
-                <div className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all w-full justify-center duration-200 min-h-[44px] ${
-                  currentTab === tab.id 
-                    ? 'bg-primary-600 text-white shadow-sm' 
-                    : currentTab > tab.id 
-                      ? 'bg-green-100 text-green-700 border border-green-200'
-                      : 'bg-gray-100 text-gray-500 border border-gray-200'
-                } tab-item`}>
+                <div
+                  className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all w-full justify-center duration-200 min-h-[44px] ${
+                    currentTab === tab.id 
+                      ? 'bg-primary-600 text-white shadow-sm' 
+                      : currentTab > tab.id 
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : 'bg-gray-100 text-gray-500 border border-gray-200'
+                  } tab-item cursor-pointer`}
+                  onClick={() => {
+                    // Allow going back to any previous tab
+                    if (tab.id < currentTab) {
+                      setCurrentTab(tab.id);
+                    }
+                    // Allow staying on current tab
+                    else if (tab.id === currentTab) {
+                      // Do nothing, already on this tab
+                    }
+                    // For forward navigation, validate current form
+                    else if (tab.id > currentTab) {
+                      if (currentTab === 1) {
+                        if (validateBasicInfo()) {
+                          setCurrentTab(tab.id);
+                        }
+                      } else if (currentTab === 2) {
+                        // For now, allow moving from tab 2 to 3 without validation
+                        // Add validation here if needed
+                        setCurrentTab(tab.id);
+                      }
+                    }
+                  }}
+                >
                   <div className="flex-shrink-0">
                     {tab.icon}
                   </div>
@@ -675,7 +723,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
         </div>
 
         {/* Form Content */}
-        <div className="bg-white form-content">
+        <div className="bg-white form-content" >
           {currentTab === 1 && (
             <div className="p-4 sm:p-6 basic-info-tab">
               <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Basic Information</h2>
@@ -699,7 +747,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 personal-info-grid">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 personal-info-grid">
                   <Input
                     label="Date of Birth *"
                     type="date"
@@ -715,7 +763,10 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                     error={errors.gender}
                     placeholder="Select Gender"
                   />
-                  <Input
+                 
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 personal-info-grid">
+                <Input
                     label="Phone Number *"
                     type="tel"
                     value={basicInfo.phoneNumber}
@@ -723,7 +774,15 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                     error={errors.phoneNumber}
                     placeholder="e.g., 07123 456789"
                   />
-                </div>
+                    <Select
+                    label="Spoken Language *"
+                    options={languageOptions}
+                    value={basicInfo.spokenLanguage}
+                    onChange={(e) => handleInputChange('spokenLanguage', e.target.value)}
+                  />
+                  </div>
+
+                
 
                 {/* Address Section */}
                 <div className="border-t border-gray-100 pt-6 address-section">
@@ -773,15 +832,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                   </div>
                 </div>
 
-                {/* Language */}
-                <div className="border-t border-gray-100 pt-6 language-section">
-                  <Select
-                    label="Spoken Language *"
-                    options={languageOptions}
-                    value={basicInfo.spokenLanguage}
-                    onChange={(e) => handleInputChange('spokenLanguage', e.target.value)}
-                  />
-                </div>
+              
 
                 {/* Next of Kin */}
                 <div className="border-t border-gray-100 pt-6 next-of-kin-section">
@@ -830,7 +881,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                       value={basicInfo.registeredDoctor.contactNumber}
                       onChange={(e) => handleInputChange('registeredDoctor.contactNumber', e.target.value)}
                       error={errors.doctorContact}
-                      placeholder="Surgery phone number"
+                      placeholder="Doctor phone number"
                     />
                   </div>
                 </div>
@@ -843,7 +894,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                       label="Other Residents/Pets"
                       value={basicInfo.otherResidents}
                       onChange={(e) => handleInputChange('otherResidents', e.target.value)}
-                      placeholder="List other people or pets in the household"
+                      placeholder="Enter details of other people or pets in the household"
                     />
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 key-info-grid">
@@ -900,7 +951,7 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                       variant="ghost"
                       size="sm"
                       icon={<Edit2 size={16} />}
-                      onClick={() => console.log('Edit district')}
+                      onClick={() => setShowDistrictModal(true)}
                     >
                       Edit
                     </Button>
@@ -1392,6 +1443,68 @@ export const AddNewClient: React.FC<AddNewClientProps> = ({ onNavigate }) => {
                   onClick={handleSaveVisits}
                 >
                   Save Changes
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* District Edit Modal */}
+      {showDistrictModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Edit Assigned District
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<X size={16} />}
+                  onClick={() => setShowDistrictModal(false)}
+                >
+                  {''}
+                </Button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <p className="text-gray-600 mb-4">
+                Select the district where this client should be assigned:
+              </p>
+              
+              <div className="space-y-2">
+                {AVAILABLE_DISTRICTS.map((district) => (
+                  <button
+                    key={district}
+                    onClick={() => handleDistrictChange(district)}
+                    className={`w-full text-sm text-left p-3 rounded-lg border transition-colors ${
+                      careRequirements.district === district
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{district}</span>
+                      {careRequirements.district === district && (
+                        <Check size={16} className="text-blue-600" />
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-gray-200">
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={() => setShowDistrictModal(false)}
+                >
+                  Cancel
                 </Button>
               </div>
             </div>

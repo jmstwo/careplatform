@@ -17,6 +17,7 @@ import { Incidents } from './pages/Incidents';
 import { SettingsPage } from './pages/SettingsPage';
 import { ROUTES } from './utils/constants';
 import './styles/themes.css';
+import './styles/global.css';
 
 function App() {
   const [currentPath, setCurrentPath] = useState(ROUTES.DASHBOARD);

@@ -1,0 +1,99 @@
+.react-datepicker-popper[data-placement='top']{
+    z-index: 10 !important;
+  }
+
+  .react-datepicker{
+    border: 1px solid #d7dde7;
+  }
+
+
+  /* Base container */
+
+  
+  /* Header with month/year and navigation arrows */
+  .react-datepicker__header {
+    background-color: var(--color-primary-100);
+    border-bottom: 1px solid var(--border);
+    padding: var(--spacing-sm);
+    border-top-left-radius: var(--border-radius-md);
+    border-top-right-radius: var(--border-radius-md);
+    color: var(--foreground);
+  }
+  
+  .react-datepicker__navigation-icon::before, .react-datepicker__year-read-view--down-arrow, .react-datepicker__month-read-view--down-arrow, .react-datepicker__month-year-read-view--down-arrow
+  {
+    border-color: var(--color-primary-300);
+
+  }
+  /* Navigation buttons (prev/next) */
+  .react-datepicker__navigation {
+    top: 8px;
+    line-height: 1.5;
+    border-color: var(--color-primary-500);
+    fill: var(--color-primary-500);
+    transition: fill 0.2s;
+  }
+
+  .react-datepicker__navigation:hover *::before
+  {
+    border-color: var(--color-primary-500);
+  }
+  .react-datepicker__current-month, .react-datepicker-time__header, .react-datepicker-year-header
+  {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .react-datepicker__navigation:hover {
+    fill: var(--color-primary-700);
+  }
+  
+
+  
+
+  
+  /* Hover state for days */
+  .react-datepicker__day:hover {
+    background-color: var(--color-primary-100);
+    color: var(--color-primary-700);
+  }
+  
+  /* Selected day */
+  .react-datepicker__day--selected,
+  .react-datepicker__day--keyboard-selected {
+    background-color: var(--color-primary-500);
+    color: white;
+    font-weight: 600;
+  }
+  
+  /* Disabled days */
+  .react-datepicker__day--disabled {
+    color: var(--color-gray-400);
+    cursor: not-allowed;
+  }
+  
+  /* Today highlight */
+  .react-datepicker__day--today {
+    border: 1px solid var(--color-primary-500);
+    font-weight: 600;
+  }
+  
+
+  .react-datepicker-popper[data-placement^=bottom] .react-datepicker__triangle {
+    fill: var(--color-primary-100);
+    color: var(--color-primary-100);
+    stroke: var(--color-primary-100);
+}
+
+
+.react-datepicker__header:not(.react-datepicker__header--has-time-select)
+
+{
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+}
+
+  
+
+  
+  
+  
