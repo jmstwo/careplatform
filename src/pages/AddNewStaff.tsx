@@ -72,7 +72,7 @@ interface StaffData {
   preferredDistrict: string;
   vehicleNumber: string;
   availability: string;
-  preferredShifts: string[];
+  preferredShifts: string;
   weeklySchedule: DaySchedule[];
 }
 
@@ -117,6 +117,13 @@ const AVAILABILITY_OPTIONS = [
   { value: 'part-time', label: 'Part Time' }
 ];
 
+const PREFERRED_SHIFTS_OPTIONS = [
+  { value: '', label: 'Select Preferred Shift' },
+  { value: 'AM', label: 'AM' },
+  { value: 'PM', label: 'PM' },
+  { value: 'Both', label: 'Both' }
+];
+
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 interface AddNewStaffProps {
@@ -155,7 +162,7 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
     preferredDistrict: '',
     vehicleNumber: '',
     availability: 'full-time',
-    preferredShifts: [],
+    preferredShifts: '',
     weeklySchedule: DAYS_OF_WEEK.map(day => ({
       day,
       am: false,
@@ -169,8 +176,8 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
   React.useEffect(() => {
     const newSchedule = data.weeklySchedule.map(daySchedule => ({
       ...daySchedule,
-      am: data.preferredShifts.includes('AM') || data.preferredShifts.includes('Both'),
-      pm: data.preferredShifts.includes('PM') || data.preferredShifts.includes('Both')
+      am: data.preferredShifts === 'AM' || data.preferredShifts === 'Both',
+      pm: data.preferredShifts === 'PM' || data.preferredShifts === 'Both'
     }));
     
     setData(prev => ({ ...prev, weeklySchedule: newSchedule }));
@@ -183,30 +190,6 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
       postcode: address.postcode
     }));
     setErrors(prev => ({ ...prev, postcode: '' }));
-  };
-
-  const handlePreferredShiftsChange = (shift: string) => {
-    setData(prev => {
-      const currentShifts = prev.preferredShifts;
-      let newShifts: string[];
-      
-      if (shift === 'Both') {
-        newShifts = currentShifts.includes('Both') ? [] : ['Both'];
-      } else {
-        if (currentShifts.includes('Both')) {
-          newShifts = [shift];
-        } else if (currentShifts.includes(shift)) {
-          newShifts = currentShifts.filter(s => s !== shift);
-        } else {
-          newShifts = [...currentShifts.filter(s => s !== 'Both'), shift];
-          if (newShifts.includes('AM') && newShifts.includes('PM')) {
-            newShifts = ['Both'];
-          }
-        }
-      }
-      
-      return { ...prev, preferredShifts: newShifts };
-    });
   };
 
   const handleDayScheduleChange = (dayIndex: number, period: 'am' | 'pm', checked: boolean) => {
@@ -287,17 +270,17 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="add-new-staff min-h-screen bg-gray-50 pb-20">
-      <div className="add-new-staff__container max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-4xl mx-auto p-6">
         
-        {/* Page Header */}
-        <div className="add-new-staff__header bg-white rounded-xl p-6 border border-gray-100 mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-2">Add New Staff Member</h1>
-          <p className="text-gray-600">Enter staff member details and work preferences</p>
-        </div>
+        {/* Page Header with Tabs */}
+        <div className="bg-white rounded-xl border border-gray-100 mb-6">
+          <div className="p-6 border-b border-gray-100">
+            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Add New Staff Member</h1>
+            <p className="text-gray-600">Enter staff member details and work preferences</p>
+          </div>
 
-        {/* Tab Navigation */}
-        <div className="add-new-staff__tabs bg-white rounded-xl border border-gray-100 mb-6">
+          {/* Tab Navigation */}
           <div className="flex border-b border-gray-100">
             <button
               onClick={() => setActiveTab('personal')}
@@ -332,7 +315,7 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
             {activeTab === 'personal' && (
               <div className="space-y-6">
                 {/* Basic Information */}
-                <div className="add-new-staff__section">
+                <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <User size={20} />
                     Basic Information
@@ -398,7 +381,7 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Address Information */}
-                <div className="add-new-staff__section">
+                <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <MapPin size={20} />
                     Address Information
@@ -473,7 +456,7 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
             {activeTab === 'work' && (
               <div className="space-y-6">
                 {/* Employment Information */}
-                <div className="add-new-staff__section">
+                <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <Briefcase size={20} />
                     Employment Information
@@ -507,51 +490,23 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
                       placeholder="Enter vehicle number"
                       icon={<Car size={16} />}
                     />
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Availability *
-                    </label>
-                    <div className="flex gap-4">
-                      {AVAILABILITY_OPTIONS.map((option) => (
-                        <label key={option.value} className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="availability"
-                            value={option.value}
-                            checked={data.availability === option.value}
-                            onChange={(e) => setData(prev => ({ ...prev, availability: e.target.value }))}
-                            className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">{option.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Preferred Shifts
-                    </label>
-                    <div className="flex gap-4">
-                      {['AM', 'PM', 'Both'].map((shift) => (
-                        <label key={shift} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={data.preferredShifts.includes(shift)}
-                            onChange={() => handlePreferredShiftsChange(shift)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">{shift}</span>
-                        </label>
-                      ))}
-                    </div>
+                    <Select
+                      label="Availability *"
+                      options={AVAILABILITY_OPTIONS}
+                      value={data.availability}
+                      onChange={(e) => setData(prev => ({ ...prev, availability: e.target.value }))}
+                    />
+                    <Select
+                      label="Preferred Shift"
+                      options={PREFERRED_SHIFTS_OPTIONS}
+                      value={data.preferredShifts}
+                      onChange={(e) => setData(prev => ({ ...prev, preferredShifts: e.target.value }))}
+                    />
                   </div>
                 </div>
 
                 {/* Work Schedule */}
-                <div className="add-new-staff__section">
+                <div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <Clock size={20} />
                     Work Schedule
@@ -620,52 +575,42 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
         </div>
 
         {/* Form Actions */}
-        <div className="add-new-staff__actions bg-white rounded-xl p-6 border border-gray-100 sticky bottom-6">
-          <div className="flex flex-col sm:flex-row justify-between gap-3">
+        <div className="bg-white rounded-xl p-6 border border-gray-100 sticky bottom-6">
+          <div className="flex justify-end gap-3">
             <Button
-              variant="secondary"
+              variant="ghost"
               size="md"
-              onClick={() => console.log('Save as draft')}
+              onClick={() => onNavigate?.('/staff-management')}
             >
-              Save as Draft
+              Cancel
             </Button>
             
-            <div className="flex gap-3">
+            {activeTab === 'personal' ? (
               <Button
-                variant="ghost"
+                variant="primary"
                 size="md"
-                onClick={() => onNavigate?.('/staff-management')}
+                onClick={handleNextTab}
               >
-                Cancel
+                Next
               </Button>
-              
-              {activeTab === 'personal' ? (
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={handleNextTab}
-                >
-                  Next: Work Details
-                </Button>
-              ) : (
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={handleSubmit}
-                >
-                  Add Staff Member
-                </Button>
-              )}
-            </div>
+            ) : (
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handleSubmit}
+              >
+                Add Staff Member
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Custom Times Modal */}
       {editingDay && (
-        <div className="custom-times-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="custom-times-modal__content bg-white rounded-xl max-w-md w-full">
-            <div className="custom-times-modal__header p-6 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Custom Times - {editingDay}
@@ -682,7 +627,7 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
               </div>
             </div>
             
-            <div className="custom-times-modal__body p-6">
+            <div className="p-6">
               <div className="space-y-4">
                 <Input
                   label="Start Time"
@@ -699,7 +644,7 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
               </div>
             </div>
             
-            <div className="custom-times-modal__footer p-6 border-t border-gray-200">
+            <div className="p-6 border-t border-gray-200">
               <div className="flex justify-end gap-3">
                 <Button
                   variant="ghost"
