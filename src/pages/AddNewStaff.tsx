@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   User, 
   MapPin, 
@@ -15,7 +15,10 @@ import {
   Plus,
   Minus,
   Copy,
-  Check
+  Check,
+  ArrowLeft,
+  ArrowRight,
+  FileText
 } from 'lucide-react';
 import { Button } from '../components/atoms/Button';
 import { Input } from '../components/atoms/Input';
@@ -131,7 +134,7 @@ interface AddNewStaffProps {
 }
 
 export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
-  const [activeTab, setActiveTab] = useState<'personal' | 'work'>('personal');
+  const [activeTab, setActiveTab] = useState('personal');
   const [editingDay, setEditingDay] = useState<string | null>(null);
   const [customTimes, setCustomTimes] = useState({ startTime: '', endTime: '' });
   
@@ -171,6 +174,15 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [customTimesOpen, setCustomTimesOpen] = useState(false);
+
+  // Add a ref for the form content
+  const formContentRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when tab changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab]);
 
   // Update weekly schedule when preferred shifts change
   React.useEffect(() => {
@@ -264,62 +276,110 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
   };
 
   const handleNextTab = () => {
-    if (validatePersonalDetails()) {
+    if (activeTab === 'personal') {
+      if (validatePersonalDetails()) {
+        setActiveTab('work');
+      }
+    } else if (activeTab === 'work') {
+      setActiveTab('additional');
+    }
+  };
+
+  const handlePreviousTab = () => {
+    if (activeTab === 'work') {
+      setActiveTab('personal');
+    } else if (activeTab === 'additional') {
       setActiveTab('work');
     }
   };
 
+  const handleCancel = () => {
+    onNavigate?.('/staff-management');
+  };
+
+  const tabs = [
+    { id: 'personal', label: 'Personal Details', icon: <User size={16} /> },
+    { id: 'work', label: 'Work Details', icon: <Briefcase size={16} /> }
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-50 pb-20 add-staff-page">
+      
+      <div className="mx-auto add-staff-container">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-10 rounded-tr-xl rounded-tl-xl page-header">
+          <div className="px-4 py-4 sm:px-6 header-content">
         
-        {/* Page Header with Tabs */}
-        <div className="bg-white rounded-xl border border-gray-100 mb-6">
-          <div className="p-6 border-b border-gray-100">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Add New Staff Member</h1>
-            <p className="text-gray-600">Enter staff member details and work preferences</p>
-          </div>
 
-          {/* Tab Navigation */}
-          <div className="flex border-b border-gray-100">
-            <button
-              onClick={() => setActiveTab('personal')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
-                activeTab === 'personal'
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <User size={16} />
-                Personal Details
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('work')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
-                activeTab === 'work'
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Briefcase size={16} />
-                Work Details
-              </div>
-            </button>
-          </div>
+            {/* Main Heading */}
+            <div className="mb-6 main-heading-section">
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Add New Staff Member</h1>
+              <p className="text-sm sm:text-base text-gray-600">Complete the staff registration process</p>
+            </div>
 
-          {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'personal' && (
-              <div className="space-y-6">
+          {/* Progress Indicator */}
+          <div className="flex items-center justify-center pb-4 progress-indicator-section">
+            <div className="flex items-center space-x-2 w-full sm:space-x-4 progress-tabs">
+            {tabs.map((tab, index) => (
+              <React.Fragment key={tab.id}>
+                <div
+                  className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg transition-all w-full justify-center duration-200 min-h-[44px] ${
+                    activeTab === tab.id 
+                      ? 'bg-primary-600 text-white shadow-sm' 
+                      : activeTab > tab.id 
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : 'bg-gray-100 text-gray-500 border border-gray-200'
+                  } tab-item cursor-pointer`}
+                  onClick={() => {
+                    // Allow going back to any previous tab
+                    if (tab.id < activeTab) {
+                      setActiveTab(tab.id);
+                    }
+                    // Allow staying on current tab
+                    else if (tab.id === activeTab) {
+                      // Do nothing, already on this tab
+                    }
+                    // For forward navigation, validate current form
+                    else if (tab.id > activeTab) {
+                      if (activeTab === 'personal') {
+                        if (validatePersonalDetails()) {
+                          setActiveTab(tab.id);
+                        }
+                      }
+                    }
+                  }}
+                >
+                  <div className="flex-shrink-0">
+                    {tab.icon}
+                  </div>
+                  <span className="font-medium text-xs sm:text-sm hidden sm:inline">{tab.label}</span>
+                  <span className="font-medium text-xs sm:hidden">{index + 1}</span>
+                </div>
+                {index < tabs.length - 1 && (
+                  <div className={`w-4 sm:w-8 h-0.5 transition-colors duration-200 tab-connector ${
+                    activeTab > tab.id ? 'bg-green-400' : 'bg-gray-300'
+                  }`} />
+                )}
+              </React.Fragment>
+            ))}
+            </div>
+          </div>
+          </div>
+        </div>
+
+        {/* Form Content */}
+        <div className="bg-white form-content" ref={formContentRef}>
+          {activeTab === 'personal' && (
+            <div className="p-4 sm:p-6 personal-details-tab">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Personal Details</h2>
+              
+              <div className="space-y-6 form-sections">
                 {/* Basic Information */}
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
                     <User size={20} />
                     Basic Information
-                  </h2>
+                  </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
@@ -368,99 +428,97 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
                       icon={<Mail size={16} />}
                     />
                   </div>
+                </div>
+                  {/* Languages Section */}
+                <div className="border-t border-gray-100 pt-6 languages-section">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <Globe size={20} />
+                    Spoken Languages
+                  </h3>
+                  
+                  <MultiSelect
+                    label="Languages"
+                    options={LANGUAGE_OPTIONS}
+                    value={data.spokenLanguages}
+                    onChange={(languages) => setData(prev => ({ ...prev, spokenLanguages: languages }))}
+                    placeholder="Select languages..."
+                  />
+                </div>
 
-                  <div className="mt-4">
-                    <MultiSelect
-                      label="Spoken Languages"
-                      options={LANGUAGE_OPTIONS}
-                      value={data.spokenLanguages}
-                      onChange={(languages) => setData(prev => ({ ...prev, spokenLanguages: languages }))}
-                      placeholder="Select languages"
+                {/* Address Section */}
+                <div className="border-t border-gray-100 pt-6 address-section">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <MapPin size={20} />
+                    Address Information
+                  </h3>
+                  
+                  <div className="postcode-lookup-wrapper">
+                    <PostcodeLookup
+                      onAddressSelect={handleAddressSelect}
+                      postcode={data.postcode}
+                      onPostcodeChange={(postcode) => setData(prev => ({ ...prev, postcode }))}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 address-lines-grid">
+                    <Input
+                      label="Address Line 1 *"
+                      value={data.manualAddress.line1}
+                      onChange={(e) => setData(prev => ({ 
+                        ...prev, 
+                        manualAddress: { ...prev.manualAddress, line1: e.target.value }
+                      }))}
+                      placeholder="House number and street name"
+                    />
+                    <Input
+                      label="Address Line 2"
+                      value={data.manualAddress.line2}
+                      onChange={(e) => setData(prev => ({ 
+                        ...prev, 
+                        manualAddress: { ...prev.manualAddress, line2: e.target.value }
+                      }))}
+                      placeholder="Apartment, suite, etc. (optional)"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 city-county-grid">
+                    <Input
+                      label="City/Town"
+                      value={data.manualAddress.city}
+                      onChange={(e) => setData(prev => ({ 
+                        ...prev, 
+                        manualAddress: { ...prev.manualAddress, city: e.target.value }
+                      }))}
+                      placeholder="City or town"
+                    />
+                    <Input
+                      label="County"
+                      value={data.manualAddress.county}
+                      onChange={(e) => setData(prev => ({ 
+                        ...prev, 
+                        manualAddress: { ...prev.manualAddress, county: e.target.value }
+                      }))}
+                      placeholder="County"
                     />
                   </div>
                 </div>
 
-                {/* Address Information */}
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <MapPin size={20} />
-                    Address Information
-                  </h2>
-                  
-                  <PostcodeLookup
-                    postcode={data.postcode}
-                    onPostcodeChange={(postcode) => setData(prev => ({ ...prev, postcode }))}
-                    onAddressSelect={handleAddressSelect}
-                    error={errors.postcode}
-                  />
-
-                  {data.selectedAddress && (
-                    <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                      <h4 className="text-sm font-medium text-green-900 mb-2 flex items-center gap-2">
-                        <Check size={16} />
-                        Selected Address
-                      </h4>
-                      <p className="text-sm text-green-700">
-                        {data.selectedAddress.formatted_address.join(', ')}
-                      </p>
-                    </div>
-                  )}
-
-                  {(!data.selectedAddress && data.postcode) && (
-                    <div className="mt-4 space-y-4">
-                      <h4 className="text-sm font-medium text-gray-700">Manual Address Entry</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          label="Address Line 1"
-                          value={data.manualAddress.line1}
-                          onChange={(e) => setData(prev => ({
-                            ...prev,
-                            manualAddress: { ...prev.manualAddress, line1: e.target.value }
-                          }))}
-                          placeholder="Enter address line 1"
-                        />
-                        <Input
-                          label="Address Line 2"
-                          value={data.manualAddress.line2}
-                          onChange={(e) => setData(prev => ({
-                            ...prev,
-                            manualAddress: { ...prev.manualAddress, line2: e.target.value }
-                          }))}
-                          placeholder="Enter address line 2"
-                        />
-                        <Input
-                          label="City"
-                          value={data.manualAddress.city}
-                          onChange={(e) => setData(prev => ({
-                            ...prev,
-                            manualAddress: { ...prev.manualAddress, city: e.target.value }
-                          }))}
-                          placeholder="Enter city"
-                        />
-                        <Input
-                          label="County"
-                          value={data.manualAddress.county}
-                          onChange={(e) => setData(prev => ({
-                            ...prev,
-                            manualAddress: { ...prev.manualAddress, county: e.target.value }
-                          }))}
-                          placeholder="Enter county"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+              
               </div>
-            )}
+            </div>
+          )}
 
-            {activeTab === 'work' && (
-              <div className="space-y-6">
-                {/* Employment Information */}
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          {activeTab === 'work' && (
+            <div className="p-4 sm:p-6 work-details-tab">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6 border-b border-gray-100 pb-3 section-title">Work Details</h2>
+              
+              <div className="space-y-6 form-sections">
+                {/* Employment Details */}
+                <div className="work-details__section bg-white rounded-lg p-6 border border-gray-100">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
                     <Briefcase size={20} />
-                    Employment Information
-                  </h2>
+                    Employment Details
+                  </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
@@ -468,7 +526,6 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
                       type="date"
                       value={data.joinDate}
                       onChange={(e) => setData(prev => ({ ...prev, joinDate: e.target.value }))}
-                      error={errors.joinDate}
                     />
                     <Input
                       label="Leave Date"
@@ -477,131 +534,185 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
                       onChange={(e) => setData(prev => ({ ...prev, leaveDate: e.target.value }))}
                     />
                     <Select
-                      label="Preferred District *"
-                      options={DISTRICTS}
+                      label="Preferred District"
+                      options={[
+                        { value: '', label: 'Select District' },
+                        { value: 'north', label: 'North District' },
+                        { value: 'south', label: 'South District' },
+                        { value: 'east', label: 'East District' },
+                        { value: 'west', label: 'West District' },
+                        { value: 'central', label: 'Central District' }
+                      ]}
                       value={data.preferredDistrict}
                       onChange={(e) => setData(prev => ({ ...prev, preferredDistrict: e.target.value }))}
-                      error={errors.preferredDistrict}
                     />
                     <Input
                       label="Vehicle Number"
                       value={data.vehicleNumber}
                       onChange={(e) => setData(prev => ({ ...prev, vehicleNumber: e.target.value }))}
-                      placeholder="Enter vehicle number"
+                      placeholder="Enter vehicle registration"
                       icon={<Car size={16} />}
-                    />
-                    <Select
-                      label="Availability *"
-                      options={AVAILABILITY_OPTIONS}
-                      value={data.availability}
-                      onChange={(e) => setData(prev => ({ ...prev, availability: e.target.value }))}
-                    />
-                    <Select
-                      label="Preferred Shift"
-                      options={PREFERRED_SHIFTS_OPTIONS}
-                      value={data.preferredShifts}
-                      onChange={(e) => setData(prev => ({ ...prev, preferredShifts: e.target.value }))}
                     />
                   </div>
                 </div>
 
-                {/* Work Schedule */}
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                {/* Availability Section */}
+                <div className="work-details__section bg-white rounded-lg p-6 border border-gray-100">
+                  <h3 className="text-base font-medium text-gray-900 mb-4 flex items-center gap-2">
                     <Clock size={20} />
-                    Work Schedule
-                  </h2>
+                    Availability & Schedule
+                  </h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-                    {data.weeklySchedule.map((daySchedule, index) => (
-                      <div
-                        key={daySchedule.day}
-                        className="border border-gray-200 rounded-lg p-3 bg-white"
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <h3 className="font-medium text-sm text-gray-900">{daySchedule.day}</h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            icon={<Edit2 size={14} />}
-                            onClick={() => {
-                              setEditingDay(daySchedule.day);
-                              if (daySchedule.customTimes) {
-                                setCustomTimes(daySchedule.customTimes);
-                              }
-                            }}
-                            className="p-1"
-                          />
-                        </div>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Select
+                        label="Availability"
+                        options={[
+                          { value: '', label: 'Select Availability' },
+                          { value: 'full-time', label: 'Full Time' },
+                          { value: 'part-time', label: 'Part Time' },
                         
-                        <div className="space-y-2">
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={daySchedule.am}
-                              onChange={(e) => handleDayScheduleChange(index, 'am', e.target.checked)}
-                              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <span className="text-xs text-gray-700">AM</span>
-                          </label>
-                          <label className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={daySchedule.pm}
-                              onChange={(e) => handleDayScheduleChange(index, 'pm', e.target.checked)}
-                              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            />
-                            <span className="text-xs text-gray-700">PM</span>
-                          </label>
-                        </div>
+                        ]}
+                        value={data.availability}
+                        onChange={(e) => setData(prev => ({ ...prev, availability: e.target.value }))}
+                      />
+                      <Select
+                        label="Preferred Shifts"
+                        options={[
+                          { value: '', label: 'Select Shifts' },
+                          { value: 'AM', label: 'AM' },
+                          { value: 'PM', label: 'PM' },
+                          { value: 'Both', label: 'Both' },
+                          
+                        ]}
+                        value={data.preferredShifts}
+                        onChange={(e) => setData(prev => ({ ...prev, preferredShifts: e.target.value }))}
+                      />
+                    </div>
 
-                        {daySchedule.customTimes && (
-                          <div className="mt-2">
-                            <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
-                              Custom
-                            </span>
-                            <div className="text-xs text-gray-600 mt-1">
-                              {daySchedule.customTimes.startTime} - {daySchedule.customTimes.endTime}
+                    {/* Weekly Schedule */}
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Weekly Schedule</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+                        {data.weeklySchedule.map((daySchedule, index) => (
+                          <div
+                            key={daySchedule.day}
+                            className="border border-gray-200 rounded-lg p-3 bg-white"
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <h3 className="font-medium text-sm text-gray-900">{daySchedule.day}</h3>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                icon={<Edit2 size={14} />}
+                                onClick={() => {
+                                  setEditingDay(daySchedule.day);
+                                  if (daySchedule.customTimes) {
+                                    setCustomTimes(daySchedule.customTimes);
+                                  }
+                                }}
+                                className="p-1"
+                              >
+                                {''}
+                              </Button>
                             </div>
+                            
+                            <div className="space-y-2">
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={daySchedule.am}
+                                  onChange={(e) => handleDayScheduleChange(index, 'am', e.target.checked)}
+                                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                />
+                                <span className="text-xs text-gray-700">AM</span>
+                              </label>
+                              <label className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={daySchedule.pm}
+                                  onChange={(e) => handleDayScheduleChange(index, 'pm', e.target.checked)}
+                                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                />
+                                <span className="text-xs text-gray-700">PM</span>
+                              </label>
+                            </div>
+
+                            {daySchedule.customTimes && (
+                              <div className="mt-2">
+                                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                                  Custom
+                                </span>
+                                <div className="text-xs text-gray-600 mt-1">
+                                  {daySchedule.customTimes.startTime} - {daySchedule.customTimes.endTime}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        )}
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
 
-        {/* Form Actions */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 sticky bottom-6">
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="ghost"
-              size="md"
-              onClick={() => onNavigate?.('/staff-management')}
-            >
-              Cancel
-            </Button>
-            
-            {activeTab === 'personal' ? (
-              <Button
-                variant="primary"
-                size="md"
-                onClick={handleNextTab}
-              >
-                Next
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                size="md"
-                onClick={handleSubmit}
-              >
-                Add Staff Member
-              </Button>
-            )}
+          {/* Form Actions */}
+          <div className="border-t border-gray-200 p-4 sm:p-6 bg-gray-50 sticky bottom-0 form-actions">
+            <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 action-buttons-container">
+              <div className="previous-button-wrapper">
+                {activeTab !== 'personal' && (
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={handlePreviousTab}
+                    icon={<ArrowLeft size={16} />}
+                    iconPosition="left"
+                    fullWidth={true}
+                    className="sm:w-auto previous-button"
+                  >
+                    Previous
+                  </Button>
+                )}
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-3 main-action-buttons">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  onClick={handleCancel}
+                  fullWidth={true}
+                  className="sm:w-auto order-2 sm:order-1 cancel-button"
+                >
+                  Cancel
+                </Button>
+                
+                {activeTab !== 'work' ? (
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={handleNextTab}
+                    icon={<ArrowRight size={16} />}
+                    iconPosition="right"
+                    fullWidth={true}
+                    className="sm:w-auto order-1 sm:order-2 next-button"
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button
+                    variant="success"
+                    size="md"
+                    onClick={handleSubmit}
+                    fullWidth={true}
+                    className="sm:w-auto order-1 sm:order-2 save-button"
+                  >
+                    Save Staff Member
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -623,7 +734,9 @@ export const AddNewStaff: React.FC<AddNewStaffProps> = ({ onNavigate }) => {
                     setEditingDay(null);
                     setCustomTimes({ startTime: '', endTime: '' });
                   }}
-                />
+                >
+                  {''}
+                </Button>
               </div>
             </div>
             
