@@ -340,7 +340,8 @@ export const ClientManagement: React.FC = () => {
       { id: 'care', label: 'Care Requirements', icon: <FileText size={16} /> },
       { id: 'emar', label: 'EMAR', icon: <Pill size={16} /> },
       { id: 'incidents', label: 'Incidents', icon: <AlertTriangle size={16} /> },
-      { id: 'alerts', label: 'Alerts/Log', icon: <Bell size={16} /> }
+      { id: 'alerts', label: 'Alerts/Log', icon: <Bell size={16} /> },
+      { id: 'settings', label: 'Settings', icon: <Settings size={16} /> }
     ];
 
     return (
@@ -546,6 +547,175 @@ export const ClientManagement: React.FC = () => {
                   <Activity className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Alerts & Activity Log</h3>
                   <p className="text-gray-600">System alerts and activity logs would be displayed here.</p>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Status Management */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Settings size={20} />
+                      Status Management
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Current Status
+                        </label>
+                        <div className="mb-3">
+                          {getStatusBadge(selectedClient.status)}
+                        </div>
+                        <Select
+                          label="Change Status"
+                          options={[
+                            { value: 'Active', label: 'Active' },
+                            { value: 'Pending', label: 'Pending' },
+                            { value: 'Discharged', label: 'Discharged' },
+                            { value: 'On Hold', label: 'On Hold' },
+                            { value: 'Suspended', label: 'Suspended' }
+                          ]}
+                          value={selectedClient.status}
+                          onChange={(e) => console.log('Status change:', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Service Level
+                        </label>
+                        <div className="mb-3">
+                          {getServiceLevelBadge(selectedClient.serviceLevel)}
+                        </div>
+                        <Select
+                          label="Change Service Level"
+                          options={[
+                            { value: '0', label: 'Service Level 0' },
+                            { value: '1', label: 'Service Level 1' },
+                            { value: '2', label: 'Service Level 2' },
+                            { value: '3', label: 'Service Level 3' }
+                          ]}
+                          value={selectedClient.serviceLevel.toString()}
+                          onChange={(e) => console.log('Service level change:', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Carer Restrictions */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Users size={20} />
+                      Carer Restrictions
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Gender Preference
+                        </label>
+                        <Select
+                          options={[
+                            { value: '', label: 'No Preference' },
+                            { value: 'male', label: 'Male Carer Only' },
+                            { value: 'female', label: 'Female Carer Only' }
+                          ]}
+                          value=""
+                          onChange={(e) => console.log('Gender preference:', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Language Requirements
+                        </label>
+                        <Select
+                          options={[
+                            { value: 'english', label: 'English' },
+                            { value: 'welsh', label: 'Welsh' },
+                            { value: 'polish', label: 'Polish' },
+                            { value: 'urdu', label: 'Urdu' },
+                            { value: 'other', label: 'Other' }
+                          ]}
+                          value="english"
+                          onChange={(e) => console.log('Language requirement:', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Preferred Carer
+                        </label>
+                        <Select
+                          options={[
+                            { value: '', label: 'No Preference' },
+                            { value: 'john-smith', label: 'John Smith' },
+                            { value: 'sarah-johnson', label: 'Sarah Johnson' },
+                            { value: 'michael-brown', label: 'Michael Brown' },
+                            { value: 'emma-davis', label: 'Emma Davis' }
+                          ]}
+                          value=""
+                          onChange={(e) => console.log('Preferred carer:', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            onChange={(e) => console.log('Restrict unfamiliar carers:', e.target.checked)}
+                          />
+                          <span className="text-sm text-gray-700">Restrict unfamiliar carers</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Care Notes Section */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <FileText size={20} />
+                    Care Notes & Instructions
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Special Instructions
+                      </label>
+                      <textarea
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        rows={4}
+                        placeholder="Enter any special care instructions or notes..."
+                        defaultValue={selectedClient.careNotes}
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => console.log('Save care notes')}
+                      >
+                        Save Notes
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    onClick={() => console.log('Reset changes')}
+                  >
+                    Reset Changes
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => console.log('Save all settings')}
+                  >
+                    Save All Changes
+                  </Button>
                 </div>
               </div>
             )}
