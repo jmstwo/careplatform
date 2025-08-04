@@ -428,14 +428,6 @@ export const ClientManagement: React.FC = () => {
                           {selectedClient.email}
                         </p>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Age</label>
-                        <p className="text-gray-900">{selectedClient.age} years old</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">Postcode</label>
-                        <p className="text-gray-900">{selectedClient.postcode}</p>
-                      </div>
                     </div>
                   </div>
 
@@ -479,6 +471,14 @@ export const ClientManagement: React.FC = () => {
                         {format(new Date(selectedClient.startDate), 'dd/MM/yyyy')}
                       </p>
                     </div>
+                     <div>
+                       <label className="text-sm font-medium text-gray-600">Age</label>
+                       <p className="text-gray-900">{selectedClient.age} years old</p>
+                     </div>
+                     <div>
+                       <label className="text-sm font-medium text-gray-600">Postcode</label>
+                       <p className="text-gray-900">{selectedClient.postcode}</p>
+                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">End Date</label>
                       <p className="text-gray-900 flex items-center gap-2">
