@@ -415,10 +415,6 @@ export const ClientManagement: React.FC = () => {
                         <p className="text-gray-900">{selectedClient.name}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Age</label>
-                        <p className="text-gray-900">{selectedClient.age} years old</p>
-                      </div>
-                      <div>
                         <label className="text-sm font-medium text-gray-600">Phone</label>
                         <p className="text-gray-900 flex items-center gap-2">
                           <Phone size={16} />
@@ -431,6 +427,14 @@ export const ClientManagement: React.FC = () => {
                           <Mail size={16} />
                           {selectedClient.email}
                         </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Age</label>
+                        <p className="text-gray-900">{selectedClient.age} years old</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Postcode</label>
+                        <p className="text-gray-900">{selectedClient.postcode}</p>
                       </div>
                     </div>
                   </div>
