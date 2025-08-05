@@ -113,7 +113,7 @@ const MOCK_CLIENTS: Client[] = [
     name: 'James Davis',
     age: 71,
     postcode: 'S2 4DF',
-    serviceLevel: 0,
+    serviceLevel: 2,
     startDate: '2023-12-01',
     endDate: '2024-03-01',
     district: 'West District',
@@ -181,7 +181,6 @@ const STATUS_FILTER_OPTIONS = [
 
 const SERVICE_LEVEL_OPTIONS = [
   { value: '', label: 'All Service Levels' },
-  { value: '0', label: 'SL 0' },
   { value: '1', label: 'SL 1' },
   { value: '2', label: 'SL 2' },
   { value: '3', label: 'SL 3' }
@@ -206,7 +205,7 @@ export const ClientManagement: React.FC = () => {
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'care' | 'emar' | 'incidents' | 'alerts'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'care' | 'emar' | 'incidents' | 'alerts' | 'settings'>('basic');
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -345,8 +344,8 @@ export const ClientManagement: React.FC = () => {
     ];
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-profile">
+        <div className="bg-white rounded-xl max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
           {/* Modal Header */}
           <div className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
@@ -407,7 +406,7 @@ export const ClientManagement: React.FC = () => {
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                       <User size={20} />
-                      Personal Information
+                      Basic Information
                     </h3>
                     <div className="space-y-3">
                       <div>
@@ -559,7 +558,7 @@ export const ClientManagement: React.FC = () => {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Status Management */}
-                  <div className="bg-gray-50 rounded-lg p-6">
+                  {/* <div className="bg-gray-50 rounded-lg p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <Settings size={20} />
                       Status Management
@@ -595,7 +594,6 @@ export const ClientManagement: React.FC = () => {
                         <Select
                           label="Change Service Level"
                           options={[
-                            { value: '0', label: 'Service Level 0' },
                             { value: '1', label: 'Service Level 1' },
                             { value: '2', label: 'Service Level 2' },
                             { value: '3', label: 'Service Level 3' }
@@ -605,7 +603,7 @@ export const ClientManagement: React.FC = () => {
                         />
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Carer Restrictions */}
                   <div className="bg-gray-50 rounded-lg p-6">
@@ -675,7 +673,7 @@ export const ClientManagement: React.FC = () => {
                 </div>
 
                 {/* Care Notes Section */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                {/* <div className="bg-gray-50 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                     <FileText size={20} />
                     Care Notes & Instructions
@@ -702,7 +700,7 @@ export const ClientManagement: React.FC = () => {
                       </Button>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Action Buttons */}
                 <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
@@ -782,9 +780,9 @@ export const ClientManagement: React.FC = () => {
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-primary-bg-border shadow-sm overflow-hidden">
         {/* Search and Filters - Redesigned */}
-        <div className="p-6 border-b border-gray-200 bg-gray-50">
+        <div className="p-6 border-b border-primary-bg-border bg-primary-bg">
           <div className="space-y-4">
             {/* Search Bar */}
             <div className="flex flex-col lg:flex-row gap-4">
@@ -865,10 +863,6 @@ export const ClientManagement: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <SortableHeader field="name">Client Name</SortableHeader>
-                <SortableHeader field="age">Age</SortableHeader>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Postcode
-                </th>
                 <SortableHeader field="serviceLevel">Service Level</SortableHeader>
                 <SortableHeader field="startDate">Start Date</SortableHeader>
                 <SortableHeader field="endDate">End Date</SortableHeader>
@@ -881,12 +875,12 @@ export const ClientManagement: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {paginatedClients.map((client) => (
-                <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={client.id} className="hover:bg-primary-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleClientAction(client, 'profile')}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                        className="text-sm font-medium hover:text-gray-600 transition-colors"
                       >
                         {client.name}
                       </button>
@@ -894,12 +888,9 @@ export const ClientManagement: React.FC = () => {
                         <AlertTriangle size={16} className="text-red-500" />
                       )}
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {client.age}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {client.postcode}
+                    <div className="text-xs text-gray-500 mt-1">
+                      Age {client.age} • {client.postcode}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getServiceLevelBadge(client.serviceLevel)}
@@ -933,9 +924,12 @@ export const ClientManagement: React.FC = () => {
                         size="sm"
                         icon={<Bell size={16} />}
                         onClick={() => handleClientAction(client, 'alerts')}
-                        className="p-2 hover:bg-yellow-50 hover:text-yellow-600"
+                        className="p-2 hover:bg-red-50 hover:text-red-600 relative"
                         title="View Alerts"
                       >
+                        {client.hasAlerts && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
+                        )}
                         <span className="sr-only">View Alerts</span>
                       </Button>
                       <Button

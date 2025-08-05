@@ -10,7 +10,7 @@ import { AddNewClient } from './pages/AddNewClient';
 import { AddNewStaff } from './pages/AddNewStaff';
 import { StaffManagement } from './pages/StaffManagement';
 import { EMAR } from './pages/EMAR';
-import { CareRequirements } from './pages/CareRequirements';
+// import { CareRequirements } from './pages/CareRequirements';
 import { Timesheets } from './pages/Timesheets';
 import { Patches } from './pages/Patches';
 import { Reports } from './pages/Reports';
@@ -39,12 +39,10 @@ function App() {
         return <ClientManagement />;
       case ROUTES.ADD_CLIENT:
         return <AddNewClient onNavigate={handleNavigate} />;
-      case ROUTES.ADD_STAFF:
-        return <AddNewStaff onNavigate={handleNavigate} />;
       case ROUTES.CARE_REQUIREMENTS:
         return <CareRequirements />;
       case ROUTES.STAFF:
-        return <StaffManagement onNavigate={handleNavigate} />;
+        return <StaffManagement />;
       case ROUTES.EMAR:
         return <EMAR />;
       case ROUTES.TIMESHEETS:

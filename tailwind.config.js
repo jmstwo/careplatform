@@ -4,6 +4,8 @@ export default {
   theme: {
     extend: {
          colors: {
+          'primary-bg': 'var(--color-primary-bg)',
+          'primary-bg-border': 'var(--color-primary-bg-border)',
         primary: {
           50: 'var(--color-primary-50)',
           100: 'var(--color-primary-100)',
