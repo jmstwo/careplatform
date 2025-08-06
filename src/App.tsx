@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Layout } from './components/templates/Layout';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -39,10 +39,12 @@ function App() {
         return <ClientManagement />;
       case ROUTES.ADD_CLIENT:
         return <AddNewClient onNavigate={handleNavigate} />;
-      case ROUTES.CARE_REQUIREMENTS:
-        return <CareRequirements />;
+      // case ROUTES.CARE_REQUIREMENTS:
+      //   return <CareRequirements />;
+      case ROUTES.ADD_STAFF:
+        return <AddNewStaff onNavigate={handleNavigate} />;
       case ROUTES.STAFF:
-        return <StaffManagement />;
+        return <StaffManagement onNavigate={handleNavigate} />;
       case ROUTES.EMAR:
         return <EMAR />;
       case ROUTES.TIMESHEETS:

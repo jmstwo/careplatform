@@ -21,7 +21,10 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ onNavigate }) 
             icon={<Plus size={16} />}
             variant="primary"
             size="md"
-            onClick={() => onNavigate?.(ROUTES.ADD_STAFF)}
+            onClick={() => {
+              console.log('Navigating to:', ROUTES.ADD_STAFF);
+              onNavigate(ROUTES.ADD_STAFF);
+            }}
           />
         </div>
       </div>

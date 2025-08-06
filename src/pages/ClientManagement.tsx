@@ -31,6 +31,10 @@ import { Select } from '../components/atoms/Select';
 import { Button } from '../components/atoms/Button';
 import { format } from 'date-fns';
 
+interface ClientManagementProps {
+  onNavigate: (path: string) => void;
+}
+
 interface Client {
   id: string;
   name: string;
@@ -742,7 +746,7 @@ export const ClientManagement: React.FC = () => {
             icon={<Plus size={16} />}
             variant="primary"
             size="md"
-            onClick={() => console.log('Navigate to add client')}
+            onClick={() => onNavigate('/add-client')}
           />
         </div>
       </div>
@@ -765,7 +769,7 @@ export const ClientManagement: React.FC = () => {
         />
         <StatCard
           title="Pending"
-          value={stats.pendingClients}
+          value={stats.pendingClients}onClick={() => console.log('Navigate to add client')}
           icon={<Clock size={20} />}
           color="yellow"
           onClick={() => console.log('View pending clients')}
